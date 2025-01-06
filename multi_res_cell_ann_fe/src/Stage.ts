@@ -10,5 +10,6 @@ export enum Stage {
 
 export interface CurrentState {
     stage:  Stage;
-    selectedSource: string
+    selectedSource: string;
+    selectTissue: string;
 }
