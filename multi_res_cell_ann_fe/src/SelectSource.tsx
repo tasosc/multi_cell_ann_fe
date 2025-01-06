@@ -2,7 +2,7 @@ import '@mantine/core/styles.css';
 import { Radio, Stack } from '@mantine/core';
 
 import {Stage} from './Stage';
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 interface SelectedSourceProps {
     selectedSource: string;

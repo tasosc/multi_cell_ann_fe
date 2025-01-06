@@ -1,5 +1,4 @@
 import { NavLink } from "@mantine/core";
-import { Stage } from "./Stage";
 import React from "react";
 import { IconChevronRight } from "@tabler/icons-react";
 
