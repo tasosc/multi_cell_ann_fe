@@ -1,5 +1,8 @@
+import { Sources } from "./SelectSource";
+
 export enum Stage {
     Source = 0,
+    Repo,
     ImportFile,
     Tissue,
     Cell,
@@ -10,6 +13,7 @@ export enum Stage {
 
 export interface CurrentState {
     stage:  Stage;
-    selectedSource: string;
+    selectedRepo: string[];
     selectTissue: string;
+    source: Sources;
 }

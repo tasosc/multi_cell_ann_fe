@@ -4,42 +4,41 @@ import { Radio, Stack } from '@mantine/core';
 import {Stage} from './Stage';
 import { useState } from 'react';
 
+export enum Sources {
+    None,
+    Database,
+    Import
+}
+
 interface SelectedSourceProps {
-    selectedSource: string;
-    onChange: (target: string, new_stage: Stage) => void;
+    currentSource: Sources;
+    onChange: (target: Sources, new_stage: Stage) => void;
 }
 
 interface SourceRadioProps {
-    repo: string;
+    source: Sources;
     checked: boolean
-    onChange: (repo: string) => void;
+    onChange: () => void;
 }
-
-const repos : string[] = ["7k", "CellMarker 2.0", "PanglaoDB"]
 
 function SourceRadio(props: SourceRadioProps) {
     return (
-        <Radio key={props.repo} checked={props.checked} onChange={()=> props.onChange(props.repo)} label={props.repo}/>
+        <Radio key={props.source} checked={props.checked} onChange={props.onChange} label={Sources[props.source]}/>
     );
 }
 
 export function SelectedSource(props: SelectedSourceProps) {
-    const [value, setValue] = useState(props.selectedSource);
-    const repo_radio = []
-    let onChange = (repo: string) => {
-            setValue(repo);
-            return props.onChange(repo, Stage.Tissue);
-        }
-    for(var repo of repos) {
-        repo_radio.push(<SourceRadio repo={repo} checked={value === repo} onChange={onChange} />);
-    }
+    const [value, setValue] = useState(props.currentSource);
 
     return (
         <Stack>
-            {repo_radio}
-            <SourceRadio repo='import' checked={value === "import"} onChange={(repo: string) => {
-                setValue(repo);
-                return props.onChange(repo, Stage.ImportFile);
+            <SourceRadio checked={value == Sources.Database} source={Sources.Database} onChange={() => {
+                setValue(Sources.Database);
+                return props.onChange(Sources.Database, Stage.Tissue);
+            }}  />
+            <SourceRadio  checked={value === Sources.Import} source={Sources.Import} onChange={() => {
+                setValue(Sources.Import);
+                return props.onChange(Sources.Import, Stage.ImportFile);
             }}  />
         </Stack>
     );

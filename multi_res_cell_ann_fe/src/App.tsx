@@ -1,33 +1,28 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import '@mantine/core/styles.css';
-import { FileInput, MantineProvider } from '@mantine/core';
+import { FileInput, Group, MantineProvider } from '@mantine/core';
 import { AppShell, Burger } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconHome2,  IconFileImport, IconActivityHeartbeat } from '@tabler/icons-react';
+import { IconHome2,  IconFileImport, IconActivityHeartbeat, IconDatabase } from '@tabler/icons-react';
 import { Stage } from './Stage';
 import { CurrentState } from './Stage';
-import { SelectedSource } from './SelectSource'
+import { SelectedSource, Sources } from './SelectSource'
 import { MyNav } from './MyNav';
-import { BackendApi } from './api';
 import { DropdownScroll } from './DropdownScrollSearch';
+import { SelectedRepo } from './SelectRepo';
 function App() {
 
-  let api = new BackendApi("http://localhost:8000");
   const [opened, { toggle }] = useDisclosure();
-  const [status, setStatus] = useState<CurrentState>({stage: Stage.Source, selectedSource : "", selectTissue: "" });
+  const [status, setStatus] = useState<CurrentState>({stage: Stage.Source, selectedRepo : [], selectTissue: "", source: Sources.None });
   const [importFile, setImportFile] = useState<File | null>(null);
-  const [tissues, setTissues] = useState<string[]>([]);
 
-  useEffect(() => {
-    api.get_tissues(setTissues);
-  }, []);
 
   return (
 	  <MantineProvider>
     <AppShell
-      header={{ height: 60 }}
+      header={{ height: { base: 60, md: 70, lg: 80 } }}
       navbar={{
-        width: 300,
+        width: { base: 200, md: 300, lg: 400 },
         breakpoint: 'sm',
         collapsed: { mobile: !opened },
       }}
@@ -53,22 +48,32 @@ function App() {
         <MyNav
           label="Import cells and genes"
           leftSection={<IconFileImport size="1rem" stroke={1.5} />}
-          disabled={status.selectedSource != "import"}
+          disabled={status.source != Sources.Import}
           active={status.stage == Stage.ImportFile}
           onClick={() => setStatus({...status, stage: Stage.ImportFile})}
         />
         <MyNav 
           label='Select tissue'
           leftSection={<IconActivityHeartbeat size="1rem" stroke={1.5} />}
-          disabled={!status.selectedSource}
+          disabled={status.source != Sources.Database || !status.selectTissue}
           active={status.stage == Stage.Tissue}
           onClick={() => setStatus({...status, stage: Stage.Tissue})}
+        />
+        <MyNav
+          label="Select cell repository"
+          leftSection={<IconDatabase size="1rem" stroke={1.5} />}
+          disabled={status.selectedRepo.length == 0 && status.source == Sources.Database }
+          active={status.stage == Stage.Cell}
+          onClick={() => setStatus({...status, stage: Stage.Cell})}
         />
        </AppShell.Navbar>
 
       <AppShell.Main>
         { status.stage == Stage.Source &&
-           <SelectedSource selectedSource={status.selectedSource} onChange={(target, new_stage) => {console.log(target); setStatus({...status, stage: new_stage, selectedSource: target});}}/>
+           <SelectedSource  currentSource={status.source} onChange={(target, new_stage) => {setStatus({...status, stage: new_stage, source: target});}}/>
+        }
+        { status.stage == Stage.Repo &&
+           <SelectedRepo  selectedRepo={status.selectedRepo} tissue={status.selectTissue} onChange={(selected, new_stage) => {setStatus({...status, stage: new_stage, selectedRepo: selected});}}/>
         }
         { status.stage == Stage.ImportFile && 
           <FileInput
@@ -82,9 +87,8 @@ function App() {
         }
         { status.stage == Stage.Tissue &&
           <DropdownScroll 
-           tissues={tissues}
            selectedTissue={status.selectTissue}
-           onChange={(current) => setStatus({...status, selectTissue: current})}
+           onChange={(current) => setStatus({...status, selectTissue: current, stage: Stage.Cell})}
           />
         }
       </AppShell.Main>
