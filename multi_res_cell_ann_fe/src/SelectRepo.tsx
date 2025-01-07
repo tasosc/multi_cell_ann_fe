@@ -1,47 +1,42 @@
 import '@mantine/core/styles.css';
-import { Switch } from '@mantine/core';
+import { ActionIcon, Stack, Switch } from '@mantine/core';
 
 import {Stage} from './Stage';
 import { useEffect, useState } from 'react';
 import { BackendApi } from './api';
+import { IconArrowNarrowRight } from '@tabler/icons-react';
 interface SelectedRepoProps {
     selectedRepo: string[];
-    onChange: (selected: string[], new_stage: Stage) => void;
+    onChange: (selected: string[]) => void;
     tissue: string;
 }
 
-interface SourceRadioProps {
-    repo: string;
+function get_key(value: string) {
+    return `key${value.replace(/[ .]/g, "_").toLowerCase()}`;
 }
 
-function RepoSwitch(props: SourceRadioProps) {
-    return (
-        <Switch key={props.repo} value={props.repo} label={props.repo}/>
-    );
-}
 
 export function SelectedRepo(props: SelectedRepoProps) {
     if (!props.tissue) {
         return (<></>);
     }
 
-    let api = new BackendApi();
+    const api = new BackendApi();
     const [repos, setRepos] = useState<string[]>([]);
     useEffect(() => {api.get_sources(props.tissue, setRepos)} ,[props.tissue]);
     const [value, setValue] = useState(props.selectedRepo);
     const repo_switch = []
     
     for(var repo of repos) {
-        repo_switch.push(<RepoSwitch repo={repo}   />);
+        repo_switch.push(<Switch key={get_key(repo)} value={repo} label={repo} />);
     }
-    let onChange = (selected: string[]) => {
-        setValue(selected);
-        props.onChange(selected, Stage.Cell)
-    };
 
     return (
-    <Switch.Group value={value} onChange={onChange}>
-        {repo_switch}
-    </Switch.Group>
+        <Switch.Group key="repo_select" value={value} onChange={(value) => {
+            setValue(value);
+            props.onChange(value);
+        }}>
+            {repo_switch}
+        </Switch.Group>
     );
 }

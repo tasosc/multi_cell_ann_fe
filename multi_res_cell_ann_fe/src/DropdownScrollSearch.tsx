@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import { ActionIcon, CloseButton, Combobox, Group, Stack, TextInput, useCombobox } from '@mantine/core';
+import { CloseButton, Combobox, Container, TextInput, useCombobox } from '@mantine/core';
 import { BackendApi } from './api';
-import { IconArrowNarrowRight } from '@tabler/icons-react';
 
 interface DropdownScrollProps {
   selectedTissue: string;
@@ -44,10 +43,11 @@ export function DropdownScroll(props: DropdownScrollProps) {
   console.log(`shouldFilterOptions: ${shouldFilterOptions}`);
 
   return (
-    <Stack align="stretch" justify="center">
+    <Container style={{width: '500px'}}>
       <Combobox
         onOptionSubmit={(optionValue) => {
           setValue(optionValue);
+          props.onChange(optionValue)
           combobox.closeDropdown();
         }}
         store={combobox}
@@ -57,7 +57,7 @@ export function DropdownScroll(props: DropdownScrollProps) {
           <TextInput
             label="Pick a tissue or search for one"
             placeholder="Pick a tissue or search for one"
-            value={search}
+            value={value || search}
             onChange={(event) => {
               setSearch(event.currentTarget.value);
               combobox.openDropdown();
@@ -89,10 +89,6 @@ export function DropdownScroll(props: DropdownScrollProps) {
           </Combobox.Options>
         </Combobox.Dropdown>
       </Combobox>
-      <ActionIcon size="lg" variant='filled' color='green' aria-label='Submit' onClick={() => props.onChange(value)}>
-        <IconArrowNarrowRight />
-      </ActionIcon>
-    </Stack>
-
+    </Container>
   );
 }

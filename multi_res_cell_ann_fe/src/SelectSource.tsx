@@ -1,7 +1,6 @@
 import '@mantine/core/styles.css';
 import { Radio, Stack } from '@mantine/core';
 
-import {Stage} from './Stage';
 import { useState } from 'react';
 
 export enum Sources {
@@ -12,7 +11,7 @@ export enum Sources {
 
 interface SelectedSourceProps {
     currentSource: Sources;
-    onChange: (target: Sources, new_stage: Stage) => void;
+    onChange: (target: Sources) => void;
 }
 
 interface SourceRadioProps {
@@ -34,11 +33,11 @@ export function SelectedSource(props: SelectedSourceProps) {
         <Stack>
             <SourceRadio checked={value == Sources.Database} source={Sources.Database} onChange={() => {
                 setValue(Sources.Database);
-                return props.onChange(Sources.Database, Stage.Tissue);
+                return props.onChange(Sources.Database);
             }}  />
             <SourceRadio  checked={value === Sources.Import} source={Sources.Import} onChange={() => {
                 setValue(Sources.Import);
-                return props.onChange(Sources.Import, Stage.ImportFile);
+                return props.onChange(Sources.Import);
             }}  />
         </Stack>
     );

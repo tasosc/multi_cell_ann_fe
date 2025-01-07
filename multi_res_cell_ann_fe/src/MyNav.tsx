@@ -8,6 +8,7 @@ interface MyNavProps {
     active: boolean;
     leftSection: React.ReactNode;
     onClick: () => void;
+    description?: string;
 }
 
 export function MyNav(props : MyNavProps) {
@@ -21,5 +22,6 @@ export function MyNav(props : MyNavProps) {
           disabled={props.disabled}
           active={props.active}
           onClick={() => props.onClick()}
+          description={props.description}
         />);
 }
