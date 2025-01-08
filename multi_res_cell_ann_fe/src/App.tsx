@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import '@mantine/core/styles.css';
-import { FileInput, MantineProvider, Stack } from '@mantine/core';
+import { FileInput, MantineProvider, Stack, useProps } from '@mantine/core';
 import { AppShell, Burger } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconHome2,  IconFileImport, IconActivityHeartbeat, IconDatabase, IconCell } from '@tabler/icons-react';
@@ -11,6 +11,7 @@ import { MyNav } from './MyNav';
 import { DropdownScroll } from './DropdownScrollSearch';
 import { SelectedRepo } from './SelectRepo';
 import { NavButtons } from './NavButtons';
+import { CellsSelection } from './Cells';
 function App() {
 
   const [opened, { toggle }] = useDisclosure();
@@ -116,6 +117,11 @@ function App() {
                 onChange={(current) => setStatus({ ...status, selectTissue: current })}
               />
               <NavButtons disabled={!status.selectTissue} next={() => moveStage(Stage.Repo)} prev={() => moveStage(Stage.Source)} />
+            </Stack>
+          }
+          {status.stage == Stage.Cell && 
+            <Stack>
+              <CellsSelection repos={status.selectedRepo} tissue={status.selectTissue} onCellsSelected={(cells) => console.log(cells.length)}  />
             </Stack>
           }
         </AppShell.Main>

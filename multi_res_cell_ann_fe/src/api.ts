@@ -18,11 +18,31 @@ export class BackendApi {
         .then(res => res.json())
         .then(setSources)
     }
-    get_cells(tissue: string, sources: string[], setSources: (sources: string[]) => void) {
+    get_cells(tissue: string, sources: string[]): Promise<Cell[]> {
         let queryParameter = sources.length > 0 ? `?sources=${sources.join(',')}` : '';
         let sourcesUrl= new URL(`tissues/${tissue}/cells${queryParameter}`, this.url);
-        fetch(sourcesUrl)
+        return fetch(sourcesUrl)
         .then(res => res.json())
-        .then(setSources)
+    }
+}
+
+export interface Cell {
+    cell_type: string;
+    gene_selection?: string[];
+    genes: string[];
+    is_selected: boolean;
+    new_genes?: string[];
+}
+
+export class CellImpl implements Cell {
+    cell_type: string;
+    gene_selection?: string[];
+    genes: string[];
+    is_selected: boolean;
+    new_genes?: string[];
+    constructor(cell_type: string, genes: string[] ) {
+        this.cell_type = cell_type;
+        this.genes = genes;
+        this.is_selected = false;
     }
 }

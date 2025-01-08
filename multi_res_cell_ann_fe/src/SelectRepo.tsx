@@ -3,16 +3,12 @@ import { Switch } from '@mantine/core';
 
 import { useEffect, useState } from 'react';
 import { BackendApi } from './api';
+import { get_key } from './utils';
 interface SelectedRepoProps {
     selectedRepo: string[];
     onChange: (selected: string[]) => void;
     tissue: string;
 }
-
-function get_key(value: string) {
-    return `key${value.replace(/[ .]/g, "_").toLowerCase()}`;
-}
-
 
 export function SelectedRepo(props: SelectedRepoProps) {
     if (!props.tissue) {
