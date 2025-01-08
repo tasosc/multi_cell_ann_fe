@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import '@mantine/core/styles.css';
-import { FileInput, Group, MantineProvider, Stack } from '@mantine/core';
+import { FileInput, MantineProvider, Stack } from '@mantine/core';
 import { AppShell, Burger } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconHome2,  IconFileImport, IconActivityHeartbeat, IconDatabase, IconCell } from '@tabler/icons-react';

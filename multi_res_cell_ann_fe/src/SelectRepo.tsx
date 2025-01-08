@@ -1,10 +1,8 @@
 import '@mantine/core/styles.css';
-import { ActionIcon, Stack, Switch } from '@mantine/core';
+import { Switch } from '@mantine/core';
 
-import {Stage} from './Stage';
 import { useEffect, useState } from 'react';
 import { BackendApi } from './api';
-import { IconArrowNarrowRight } from '@tabler/icons-react';
 interface SelectedRepoProps {
     selectedRepo: string[];
     onChange: (selected: string[]) => void;

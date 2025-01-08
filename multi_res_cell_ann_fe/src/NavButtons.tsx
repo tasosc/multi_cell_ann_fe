@@ -1,5 +1,4 @@
 import { Button, Group } from "@mantine/core";
-import { Stage } from "./Stage";
 
 interface NavButtonsProps {
     next?: () => void;
