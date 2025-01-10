@@ -86,13 +86,13 @@ function App() {
 
         <AppShell.Main>
           {status.stage == Stage.Source &&
-            <Stack>
+            <Stack align='flex-start'>
               <SelectedSource currentSource={status.source} onChange={(target) => { setStatus({ ...status, source: target }); }} />
               <NavButtons disabled={status.source == Sources.None} next={() => moveStage(status.source == Sources.Database ? Stage.Tissue : Stage.ImportFile)} />
             </Stack>
           }
           {status.stage == Stage.Repo &&
-            <Stack>
+            <Stack align='flex-start'>
               <SelectedRepo selectedRepo={status.selectedRepo} tissue={status.selectTissue} onChange={(selected) => { setStatus({ ...status, selectedRepo: selected }); }} />
               <NavButtons disabled={status.selectedRepo.length == 0} next={() => moveStage(Stage.Cell)} prev={() => moveStage(Stage.Tissue)} />
             </Stack>
@@ -111,7 +111,7 @@ function App() {
             </Stack>
           }
           {status.stage == Stage.Tissue &&
-            <Stack>
+            <Stack align='flex-start'>
               <DropdownScroll
                 selectedTissue={status.selectTissue}
                 onChange={(current) => setStatus({ ...status, selectTissue: current })}

@@ -43,7 +43,7 @@ export function DropdownScroll(props: DropdownScrollProps) {
   console.log(`shouldFilterOptions: ${shouldFilterOptions}`);
 
   return (
-    <Container style={{width: '500px'}}>
+    <Container style={{width: '100%'}}>
       <Combobox
         onOptionSubmit={(optionValue) => {
           setValue(optionValue);
@@ -89,6 +89,6 @@ export function DropdownScroll(props: DropdownScrollProps) {
           </Combobox.Options>
         </Combobox.Dropdown>
       </Combobox>
-    </Container>
+     </Container>
   );
 }

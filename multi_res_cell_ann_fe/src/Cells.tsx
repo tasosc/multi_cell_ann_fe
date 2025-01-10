@@ -13,37 +13,35 @@ interface CellsSelectionProps {
 
 export function CellsSelection(props: CellsSelectionProps) {
     const api = new BackendApi();
-    const [cells, setCells] = useState<Cell[]>([]);
     const [search, setSearch] = useState("");
-    const [currentCell, setCurrentCell] = useState("");
+    const [currentCell, setCurrentCell] = useState(new CellImpl("new", []));
 
-    const selectedMap = useMap<string, Cell>([]);
+    const cells = useMap<string, Cell>([]);
 
 
     useEffect(() => {
         api
         .get_cells(props.tissue, props.repos)
-        .then((rcells) => setCells(rcells));
+        .then((rcells) => rcells.map((entry) => cells.set(entry.cell_type, entry)));
     }, [props.repos, props.tissue]);
 
-    const fullMap = new Map(cells.map(cell => [cell.cell_type, cell]));
     const [opened, { open, close }] = useDisclosure(false);
-    const filteredCells = search && search.length > 0? cells.filter((item) => item.cell_type.toLowerCase().includes(search.toLowerCase().trim()) ) : cells;
+    const filteredCells = search && search.length > 0? [...cells.values()].filter((item) => item.cell_type.toLowerCase().includes(search.toLowerCase().trim()) ) : [...cells.values()];
     // TODO current cell could be Cell ? and have only one map with 
     const options = filteredCells.map((item) => {
         return (<NavLink 
                 key={get_key(item.cell_type)}
                 href="#required-for-focus"
                 label={item.cell_type}
-                active={currentCell === item.cell_type}
+                active={currentCell.cell_type === item.cell_type}
                 onClick={() => {
                     open();
-                    return setCurrentCell(item.cell_type);
+                    return setCurrentCell(item);
                 }}
                 description={`Total genes ${item.genes.length}`}
                 leftSection={
                     <Badge size="xs" color="green" circle>
-                        {selectedMap.get(item.cell_type)?.gene_selection?.length ?? 0}
+                        {cells.get(item.cell_type)?.gene_selection?.length ?? 0}
                     </Badge>
                 }
                 rightSection={<IconChevronRight />}
@@ -51,26 +49,34 @@ export function CellsSelection(props: CellsSelectionProps) {
     });
 
     return (
-        <Container style={{width: '500px'}}>
-            <Stack>
-                <Grid>
-                    <Grid.Col span={8}><TextInput value={search} label="Search for or add a cell" placeholder="Type a name of a cell type" onChange={(event) => setSearch(event.currentTarget.value)} /></Grid.Col>
-                    <Grid.Col span={2}><ActionIcon disabled={!search} variant="filled" aria-label="Add Cell" size="input-sm"><IconPlus /> </ActionIcon></Grid.Col>
-                </Grid>
-                {options}
-            </Stack>
-            <Drawer position="right" opened={opened} onClose={close} title={`Select Genes for cell ${currentCell}`}>
+        <>
+            <Container style={{ width: '500px' }}>
                 <Stack>
-                    <Switch checked={selectedMap.get(currentCell)?.is_selected ?? false} onChange={(event) => {
-                        // TODO maybe combine both maps full and selected
-                        const c : Cell = (selectedMap.get(currentCell) ?? fullMap.get(currentCell)) as Cell;
-                        // const c : Cell = selectedMap.get(currentCell) ?? fullMap.get(currentCell) ?? new CellImpl(currentCell, []);
-                        c.is_selected = event.currentTarget.checked;
-                        selectedMap.set(currentCell, c)
-                    }}/>
-                    <MultiSelect data={fullMap.get(currentCell)?.genes }/>
+                    <Grid>
+                        <Grid.Col span={8}><TextInput value={search} label="Search for or add a cell" placeholder="Type a name of a cell type" onChange={(event) => setSearch(event.currentTarget.value)} /></Grid.Col>
+                        <Grid.Col span={2}><ActionIcon disabled={!search} variant="filled" aria-label="Add Cell" size="input-sm"><IconPlus /> </ActionIcon></Grid.Col>
+                    </Grid>
+                    {options}
+                </Stack>
+
+            </Container>
+            <Drawer position="right" offset={8} radius="md" opened={opened} onClose={close} title={`Select Genes for cell ${currentCell.cell_type}`} >
+                <Stack>
+                    <Switch checked={currentCell.is_selected ?? false} onChange={(event) => {
+                        // TODO current cell will be diffent than the one in selectedMap. setCurrentCell maybe ? Then the cells will be different...
+                        // maybe we need one source of truth!!!
+                        const c = { ...currentCell, is_selected: event.currentTarget.checked };
+                        cells.set(currentCell.cell_type, c);
+                        setCurrentCell(c);
+                    }} />
+                    <MultiSelect data={currentCell.genes} value={currentCell.gene_selection ?? []} onChange={(values) => {
+                        const c = { ...currentCell, gene_selection: values };
+                        cells.set(currentCell.cell_type, c);
+                        setCurrentCell(c);
+
+                    }} />
                 </Stack>
             </Drawer>
-        </Container>
+        </>
     );
 }
