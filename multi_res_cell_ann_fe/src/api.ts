@@ -19,7 +19,8 @@ export class BackendApi {
         .then(setSources)
     }
     get_cells(tissue: string, sources: string[]): Promise<Cell[]> {
-        let queryParameter = sources.length > 0 ? `?sources=${sources.join(',')}` : '';
+        const queryParameters = sources ? sources.join('&sources=') : '';
+        let queryParameter = queryParameters.length > 0 ? `?sources=${queryParameters}` : '';
         let sourcesUrl= new URL(`tissues/${tissue}/cells${queryParameter}`, this.url);
         return fetch(sourcesUrl)
         .then(res => res.json())
