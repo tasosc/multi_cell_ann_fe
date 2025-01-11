@@ -7,7 +7,7 @@ interface DropdownScrollProps {
   onChange: (current: string) => void;
 }
 
-export function DropdownScroll(props: DropdownScrollProps) {
+export function SelectTissue(props: DropdownScrollProps) {
   const combobox = useCombobox({
     onDropdownClose: () => combobox.resetSelectedOption(),
   });

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { BackendApi, Cell, CellImpl } from "./api";
-import { Accordion, ActionIcon, Badge, Container, Drawer, Grid, MultiSelect, NavLink, Stack, Switch, TagsInput, TextInput } from "@mantine/core";
+import { ActionIcon, Badge, Drawer, MultiSelect, NavLink, Stack, Switch, TagsInput, TextInput } from "@mantine/core";
 import { IconChevronRight, IconPlus, IconSearch } from "@tabler/icons-react";
 import { get_key } from "./utils";
 import { useDisclosure, useMap } from "@mantine/hooks";

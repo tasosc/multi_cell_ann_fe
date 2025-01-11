@@ -8,7 +8,7 @@ import { Stage } from './Stage';
 import { CurrentState } from './Stage';
 import { SelectedSource, Sources } from './SelectSource'
 import { MyNav } from './MyNav';
-import { DropdownScroll } from './DropdownScrollSearch';
+import { SelectTissue } from './DropdownScrollSearch';
 import { SelectedRepo } from './SelectRepo';
 import { NavButtons } from './NavButtons';
 import { CellsSelection } from './Cells';
@@ -112,7 +112,7 @@ function App() {
           }
           {status.stage == Stage.Tissue &&
             <Stack align='flex-start'>
-              <DropdownScroll
+              <SelectTissue
                 selectedTissue={status.selectTissue}
                 onChange={(current) => setStatus({ ...status, selectTissue: current })}
               />
