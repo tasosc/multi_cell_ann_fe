@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { BackendApi, Cell, CellImpl } from "./api";
-import { Accordion, ActionIcon, Badge, Container, Drawer, Grid, MultiSelect, NavLink, Stack, Switch, TextInput } from "@mantine/core";
+import { Accordion, ActionIcon, Badge, Container, Drawer, Grid, MultiSelect, NavLink, Stack, Switch, TagsInput, TextInput } from "@mantine/core";
 import { IconChevronRight, IconPlus, IconSearch } from "@tabler/icons-react";
 import { get_key } from "./utils";
 import { useDisclosure, useMap } from "@mantine/hooks";
@@ -27,7 +27,6 @@ export function CellsSelection(props: CellsSelectionProps) {
 
     const [opened, { open, close }] = useDisclosure(false);
     const filteredCells = search && search.length > 0? [...cells.values()].filter((item) => item.cell_type.toLowerCase().includes(search.toLowerCase().trim()) ) : [...cells.values()];
-    // TODO current cell could be Cell ? and have only one map with 
     const options = filteredCells.map((item) => {
         return (<NavLink 
                 key={get_key(item.cell_type)}
@@ -50,16 +49,13 @@ export function CellsSelection(props: CellsSelectionProps) {
 
     return (
         <>
-            <Container style={{ width: '500px' }}>
-                <Stack>
-                    <Grid>
-                        <Grid.Col span={8}><TextInput value={search} label="Search for or add a cell" placeholder="Type a name of a cell type" onChange={(event) => setSearch(event.currentTarget.value)} /></Grid.Col>
-                        <Grid.Col span={2}><ActionIcon disabled={!search} variant="filled" aria-label="Add Cell" size="input-sm"><IconPlus /> </ActionIcon></Grid.Col>
-                    </Grid>
-                    {options}
-                </Stack>
+            <Stack>
+                <TextInput value={search} width="100%" label="Search for or add a cell" placeholder="Type a name of a cell type" 
+                onChange={(event) => setSearch(event.currentTarget.value)} rightSection={<IconSearch />} />
+                <ActionIcon disabled={!search} variant="filled" aria-label="Add Cell" size="xl"><IconPlus >Add Cell</IconPlus> </ActionIcon>
+                {options}
+            </Stack>
 
-            </Container>
             <Drawer position="right" offset={8} radius="md" opened={opened} onClose={close} title={`Select Genes for cell ${currentCell.cell_type}`} >
                 <Stack>
                     <Switch checked={currentCell.is_selected ?? false} onChange={(event) => {
@@ -69,11 +65,23 @@ export function CellsSelection(props: CellsSelectionProps) {
                         cells.set(currentCell.cell_type, c);
                         setCurrentCell(c);
                     }} />
-                    <MultiSelect data={currentCell.genes} value={currentCell.gene_selection ?? []} onChange={(values) => {
+                    <MultiSelect data={currentCell.genes} value={currentCell.gene_selection ?? []}
+                        searchable
+                        clearable
+                        label="Select one or more genes"
+                        nothingFoundMessage="Nothing found..."
+                        hidePickedOptions
+                        disabled={currentCell.is_selected}
+                     onChange={(values) => {
                         const c = { ...currentCell, gene_selection: values };
                         cells.set(currentCell.cell_type, c);
                         setCurrentCell(c);
-
+                    }} />
+                    <TagsInput placeholder="Add new genes" label="Add new genes"
+                    value={currentCell.new_genes ?? []} onChange={(values) => {
+                        const c = { ...currentCell, new_genes: values };
+                        cells.set(currentCell.cell_type, c);
+                        setCurrentCell(c);
                     }} />
                 </Stack>
             </Drawer>
