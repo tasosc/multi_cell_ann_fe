@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import '@mantine/core/styles.css';
-import { FileInput, MantineProvider, Stack, useProps } from '@mantine/core';
+import { FileInput, MantineProvider, Stack } from '@mantine/core';
 import { AppShell, Burger } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconHome2,  IconFileImport, IconActivityHeartbeat, IconDatabase, IconCell } from '@tabler/icons-react';
@@ -114,7 +114,7 @@ function App() {
             <Stack align='flex-start'>
               <SelectTissue
                 selectedTissue={status.selectTissue}
-                onChange={(current) => setStatus({ ...status, selectTissue: current })}
+                onChange={(current) => setStatus({ ...status, selectTissue: current, selectedRepo: [] })}
               />
               <NavButtons disabled={!status.selectTissue} next={() => moveStage(Stage.Repo)} prev={() => moveStage(Stage.Source)} />
             </Stack>

@@ -43,7 +43,7 @@ export function SelectTissue(props: DropdownScrollProps) {
   console.log(`shouldFilterOptions: ${shouldFilterOptions}`);
 
   return (
-    <Container style={{width: '100%'}}>
+    <Container style={{width: '100%'}} size="100%" mt="xs" px="0">
       <Combobox
         onOptionSubmit={(optionValue) => {
           setValue(optionValue);
