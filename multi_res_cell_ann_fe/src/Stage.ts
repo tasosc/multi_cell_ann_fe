@@ -1,3 +1,4 @@
+import { Cell } from "./api";
 import { Sources } from "./SelectSource";
 
 export enum Stage {
@@ -16,4 +17,5 @@ export interface CurrentState {
     selectedRepo: string[];
     selectTissue: string;
     source: Sources;
+    cells: Cell[];
 }

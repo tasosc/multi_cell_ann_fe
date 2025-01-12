@@ -15,7 +15,7 @@ import { CellsSelection } from './Cells';
 function App() {
 
   const [opened, { toggle }] = useDisclosure();
-  const [status, setStatus] = useState<CurrentState>({stage: Stage.Source, selectedRepo : [], selectTissue: "", source: Sources.None });
+  const [status, setStatus] = useState<CurrentState>({stage: Stage.Source, selectedRepo : [], selectTissue: "", source: Sources.None, cells: [] });
   const [importFile, setImportFile] = useState<File | null>(null);
 
   const moveStage=(stage: Stage) => setStatus({...status, stage: stage});
@@ -121,7 +121,7 @@ function App() {
           }
           {status.stage == Stage.Cell && 
             <Stack>
-              <CellsSelection repos={status.selectedRepo} tissue={status.selectTissue} onCellsSelected={(cells) => console.log(cells.length)}  />
+              <CellsSelection repos={status.selectedRepo} tissue={status.selectTissue} onCellsSelected={(cells) => setStatus({...status, cells: cells})}  />
             </Stack>
           }
         </AppShell.Main>
