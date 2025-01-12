@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { BackendApi, Cell, CellImpl } from "./api";
-import { ActionIcon, Badge, Drawer, MultiSelect, NavLink, Stack, Switch, TagsInput, TextInput } from "@mantine/core";
-import { IconChevronRight, IconPlus, IconSearch } from "@tabler/icons-react";
-import { get_key } from "./utils";
+import { BackendApi, Cell } from "./api";
+import { Badge, Button, Drawer, MultiSelect, NavLink, Stack, Switch, TagsInput, TextInput } from "@mantine/core";
+import { IconCheckbox, IconChevronRight, IconClearAll, IconFileImport, IconPlus, IconSearch } from "@tabler/icons-react";
+import { get_key, is_valid } from "./utils";
 import { useDisclosure, useMap } from "@mantine/hooks";
 
 interface CellsSelectionProps {
@@ -11,10 +11,21 @@ interface CellsSelectionProps {
     onCellsSelected: (cells: Cell[]) => void;
 }
 
+function extractSelected(cells : Map<string, Cell>) : Cell[] {
+    return [...cells.values()].filter((cell) => cell.is_selected || is_valid(cell.gene_selection) || is_valid(cell.new_genes));
+}
+
+function setSelection(cells : Cell[], is_selected: boolean, map : Map<string, Cell>) {
+    for(let i=0; i< cells.length; i++) {
+        const c = { ...cells[i], is_selected: is_selected };
+        map.set(c.cell_type, c);
+    }
+}
+
 export function CellsSelection(props: CellsSelectionProps) {
     const api = new BackendApi();
     const [search, setSearch] = useState("");
-    const [currentCell, setCurrentCell] = useState(new CellImpl("new", []));
+    const [currentCell, setCurrentCell] = useState<Cell>({cell_type: "new", genes:[], is_selected: false, new_genes:[]});
 
     const cells = useMap<string, Cell>([]);
 
@@ -52,15 +63,20 @@ export function CellsSelection(props: CellsSelectionProps) {
             <Stack>
                 <TextInput value={search} width="100%" label="Search for or add a cell" placeholder="Type a name of a cell type" 
                 onChange={(event) => setSearch(event.currentTarget.value)} rightSection={<IconSearch />} />
-                <ActionIcon disabled={!search} variant="filled" aria-label="Add Cell" size="xl"><IconPlus >Add Cell</IconPlus> </ActionIcon>
+                <Button.Group>
+                    <Button variant="filled" color="green" disabled={!search} onClick={() => 
+                        !cells.has(search) && cells.set(search, {cell_type: search, is_selected: false, genes:[], new_genes:[]})
+                    }><IconPlus/>Add as new cell</Button>
+                    <Button variant="light" onClick={()=> setSelection(filteredCells, true, cells)}><IconCheckbox/>Select all</Button>
+                    <Button variant="outline" onClick={()=> setSelection(filteredCells, true, cells)}><IconClearAll/>Deselect all</Button>
+                    <Button variant="filled" disabled={!search} onClick={() => props.onCellsSelected(extractSelected(cells))}><IconFileImport/>Save Selection</Button>
+                </Button.Group>
                 {options}
             </Stack>
 
             <Drawer position="right" offset={8} radius="md" opened={opened} onClose={close} title={`Select Genes for cell ${currentCell.cell_type}`} >
                 <Stack>
                     <Switch checked={currentCell.is_selected ?? false} onChange={(event) => {
-                        // TODO current cell will be diffent than the one in selectedMap. setCurrentCell maybe ? Then the cells will be different...
-                        // maybe we need one source of truth!!!
                         const c = { ...currentCell, is_selected: event.currentTarget.checked };
                         cells.set(currentCell.cell_type, c);
                         setCurrentCell(c);
