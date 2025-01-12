@@ -12,7 +12,11 @@ interface CellsSelectionProps {
 }
 
 function extractSelected(cells : Map<string, Cell>) : Cell[] {
-    return [...cells.values()].filter((cell) => cell.is_selected || is_valid(cell.gene_selection) || is_valid(cell.new_genes));
+    return [...cells.values()].filter(hasSelectedGenes);
+}
+
+function hasSelectedGenes(cell: Cell) {
+    return cell.is_selected || is_valid(cell.gene_selection) || is_valid(cell.new_genes);
 }
 
 function setSelection(cells : Cell[], is_selected: boolean, map : Map<string, Cell>) {
@@ -50,8 +54,8 @@ export function CellsSelection(props: CellsSelectionProps) {
                 }}
                 description={`Total genes ${item.genes.length}`}
                 leftSection={
-                    <Badge size="xs" color="green" circle>
-                        {cells.get(item.cell_type)?.gene_selection?.length ?? 0}
+                    <Badge size="md" color={hasSelectedGenes(item) ? "blue" : "yellow"} circle>
+                        {(item.is_selected ? item.genes.length : (item.gene_selection?.length ?? 0)) + (item.new_genes?.length ?? 0)}
                     </Badge>
                 }
                 rightSection={<IconChevronRight />}
@@ -69,7 +73,7 @@ export function CellsSelection(props: CellsSelectionProps) {
                     }><IconPlus/>Add as new cell</Button>
                     <Button variant="light" onClick={()=> setSelection(filteredCells, true, cells)}><IconCheckbox/>Select all</Button>
                     <Button variant="outline" onClick={()=> setSelection(filteredCells, true, cells)}><IconClearAll/>Deselect all</Button>
-                    <Button variant="filled" disabled={!search} onClick={() => props.onCellsSelected(extractSelected(cells))}><IconFileImport/>Save Selection</Button>
+                    <Button variant="filled" onClick={() => props.onCellsSelected(extractSelected(cells))}><IconFileImport/>Save Selection</Button>
                 </Button.Group>
                 {options}
             </Stack>
