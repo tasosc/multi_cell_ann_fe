@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { BackendApi, Cell } from "./api";
-import { Badge, Button, Drawer, MultiSelect, NavLink, Stack, Switch, TagsInput, TextInput } from "@mantine/core";
+import { Badge, Button, CloseButton, Drawer, MultiSelect, NavLink, Stack, Switch, TagsInput, TextInput } from "@mantine/core";
 import { IconCheckbox, IconChevronRight, IconClearAll, IconFileImport, IconPlus, IconSearch } from "@tabler/icons-react";
 import { get_key, is_valid } from "./utils";
 import { useDisclosure, useMap } from "@mantine/hooks";
@@ -66,13 +66,26 @@ export function CellsSelection(props: CellsSelectionProps) {
         <>
             <Stack>
                 <TextInput value={search} width="100%" label="Search for or add a cell" placeholder="Type a name of a cell type" 
-                onChange={(event) => setSearch(event.currentTarget.value)} rightSection={<IconSearch />} />
+                    onChange={(event) => setSearch(event.currentTarget.value)} leftSection={<IconSearch />} 
+                    rightSection={
+                        (search !== '') && (
+                            <CloseButton
+                                size="sm"
+                                onMouseDown={(event) => event.preventDefault()}
+                                onClick={() => {
+                                    setSearch('');
+                                }}
+                                aria-label="Clear value"
+                            />
+                        )
+                    }
+                />
                 <Button.Group>
-                    <Button variant="filled" color="green" disabled={!search} onClick={() => 
+                    <Button variant="filled" color="green" disabled={!search || cells.has(search)} onClick={() => 
                         !cells.has(search) && cells.set(search, {cell_type: search, is_selected: false, genes:[], new_genes:[]})
                     }><IconPlus/>Add as new cell</Button>
                     <Button variant="light" onClick={()=> setSelection(filteredCells, true, cells)}><IconCheckbox/>Select all</Button>
-                    <Button variant="outline" onClick={()=> setSelection(filteredCells, true, cells)}><IconClearAll/>Deselect all</Button>
+                    <Button variant="outline" onClick={()=> setSelection(filteredCells, false, cells)}><IconClearAll/>Deselect all</Button>
                     <Button variant="filled" onClick={() => props.onCellsSelected(extractSelected(cells))}><IconFileImport/>Save Selection</Button>
                 </Button.Group>
                 {options}
