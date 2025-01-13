@@ -12,7 +12,6 @@ import { SelectTissue } from './DropdownScrollSearch';
 import { SelectedRepo } from './SelectRepo';
 import { NavButtons } from './NavButtons';
 import { CellsSelection } from './Cells';
-import { get_disabled, get_next_stage } from './router';
 function App() {
 
   const [opened, { toggle }] = useDisclosure();
@@ -86,7 +85,7 @@ function App() {
         </AppShell.Navbar>
 
         <AppShell.Main>
-          <Stack>
+          <Stack align='flex-start'>
             {status.stage == Stage.Source &&
               <SelectedSource currentSource={status.source} onChange={(target) => { setStatus({ ...status, source: target }); }} />
             }
