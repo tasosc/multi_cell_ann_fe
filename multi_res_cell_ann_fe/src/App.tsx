@@ -121,8 +121,9 @@ function App() {
           }
           {status.stage == Stage.Cell && 
             <Stack>
-              <CellsSelection repos={status.selectedRepo} tissue={status.selectTissue} onCellsSelected={(cells) => setStatus({...status, cells: cells})}  />
+              <CellsSelection repos={status.selectedRepo} cells={status.cells} tissue={status.selectTissue} onCellsSelected={(cells) => setStatus({...status, cells: cells})}  />
             </Stack>
+            // TODO common NavButtons
           }
         </AppShell.Main>
       </AppShell>

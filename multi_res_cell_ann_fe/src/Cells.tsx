@@ -9,6 +9,7 @@ interface CellsSelectionProps {
     tissue: string;
     repos: string[];
     onCellsSelected: (cells: Cell[]) => void;
+    cells: Cell[];
 }
 
 function extractSelected(cells : Map<string, Cell>) : Cell[] {
@@ -31,13 +32,16 @@ export function CellsSelection(props: CellsSelectionProps) {
     const [search, setSearch] = useState("");
     const [currentCell, setCurrentCell] = useState<Cell>({cell_type: "new", genes:[], is_selected: false, new_genes:[]});
 
-    const cells = useMap<string, Cell>([]);
+    const cells = useMap<string, Cell>(props.cells.map((item) => [item.cell_type, item]));
 
 
     useEffect(() => {
+        if (props.repos.length == 0) {
+            return;
+        }
         api
         .get_cells(props.tissue, props.repos)
-        .then((rcells) => rcells.map((entry) => cells.set(entry.cell_type, entry)));
+        .then((rcells) => rcells.map((entry) => !cells.has(entry.cell_type) && cells.set(entry.cell_type, entry)));
     }, [props.repos, props.tissue]);
 
     const [opened, { open, close }] = useDisclosure(false);
