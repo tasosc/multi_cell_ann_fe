@@ -12,6 +12,7 @@ import { SelectTissue } from './DropdownScrollSearch';
 import { SelectedRepo } from './SelectRepo';
 import { NavButtons } from './NavButtons';
 import { CellsSelection } from './Cells';
+import { get_disabled, get_next_stage } from './router';
 function App() {
 
   const [opened, { toggle }] = useDisclosure();
@@ -85,20 +86,14 @@ function App() {
         </AppShell.Navbar>
 
         <AppShell.Main>
-          {status.stage == Stage.Source &&
-            <Stack align='flex-start'>
+          <Stack>
+            {status.stage == Stage.Source &&
               <SelectedSource currentSource={status.source} onChange={(target) => { setStatus({ ...status, source: target }); }} />
-              <NavButtons disabled={status.source == Sources.None} next={() => moveStage(status.source == Sources.Database ? Stage.Tissue : Stage.ImportFile)} />
-            </Stack>
-          }
-          {status.stage == Stage.Repo &&
-            <Stack align='flex-start'>
-              <SelectedRepo selectedRepo={status.selectedRepo} tissue={status.selectTissue} onChange={(selected) => { setStatus({ ...status, selectedRepo: selected }); }} />
-              <NavButtons disabled={status.selectedRepo.length == 0} next={() => moveStage(Stage.Cell)} prev={() => moveStage(Stage.Tissue)} />
-            </Stack>
-          }
-          {status.stage == Stage.ImportFile &&
-            <Stack>
+            }
+            {status.stage == Stage.Repo &&
+              <SelectedRepo selectedRepo={status.selectedRepo} tissue={status.selectTissue} onChange={(selected) => { setStatus({ ...status, selectedRepo: selected, cells: [] }); }} />
+            }
+            {status.stage == Stage.ImportFile &&
               <FileInput
                 radius="md"
                 value={importFile}
@@ -107,24 +102,18 @@ function App() {
                 placeholder="Select previously saved cells and genes"
                 onChange={setImportFile}
               />
-              <NavButtons disabled={!importFile} next={() => moveStage(Stage.Analysis)} prev={() => moveStage(Stage.Source)} />
-            </Stack>
-          }
-          {status.stage == Stage.Tissue &&
-            <Stack align='flex-start'>
+            }
+            {status.stage == Stage.Tissue &&
               <SelectTissue
                 selectedTissue={status.selectTissue}
-                onChange={(current) => setStatus({ ...status, selectTissue: current, selectedRepo: [] })}
+                onChange={(current) => setStatus({ ...status, selectTissue: current, selectedRepo: [], cells: [] })}
               />
-              <NavButtons disabled={!status.selectTissue} next={() => moveStage(Stage.Repo)} prev={() => moveStage(Stage.Source)} />
-            </Stack>
-          }
-          {status.stage == Stage.Cell && 
-            <Stack>
-              <CellsSelection repos={status.selectedRepo} cells={status.cells} tissue={status.selectTissue} onCellsSelected={(cells) => setStatus({...status, cells: cells})}  />
-            </Stack>
-            // TODO common NavButtons
-          }
+            }
+            {status.stage == Stage.Cell &&
+              <CellsSelection repos={status.selectedRepo} cells={status.cells} tissue={status.selectTissue} onCellsSelected={(cells) => setStatus({ ...status, cells: cells })} />
+            }
+            <NavButtons currentStatus={status}  next={(nextStage) => moveStage(nextStage)} prev={(prevStage) => moveStage(prevStage)} />
+          </Stack>
         </AppShell.Main>
       </AppShell>
 

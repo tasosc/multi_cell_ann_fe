@@ -7,6 +7,7 @@ export enum Stage {
     ImportFile,
     Tissue,
     Cell,
+    Settings,
     File,
     Analysis,
     Completed
