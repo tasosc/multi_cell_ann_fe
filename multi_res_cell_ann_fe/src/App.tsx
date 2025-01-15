@@ -3,7 +3,7 @@ import '@mantine/core/styles.css';
 import { FileInput, MantineProvider, Stack } from '@mantine/core';
 import { AppShell, Burger } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconHome2,  IconFileImport, IconActivityHeartbeat, IconDatabase, IconCell } from '@tabler/icons-react';
+import { IconHome2,  IconFileImport, IconActivityHeartbeat, IconDatabase, IconCell, IconSettings } from '@tabler/icons-react';
 import { Stage } from './Stage';
 import { CurrentState } from './Stage';
 import { SelectedSource, Sources } from './SelectSource'
@@ -12,6 +12,7 @@ import { SelectTissue } from './DropdownScrollSearch';
 import { SelectedRepo } from './SelectRepo';
 import { NavButtons } from './NavButtons';
 import { CellsSelection } from './Cells';
+import { SettingsOptions } from './Settings';
 function App() {
 
   const [opened, { toggle }] = useDisclosure();
@@ -78,10 +79,19 @@ function App() {
           <MyNav
             label="Select cell repository"
             leftSection={<IconCell size="1rem" stroke={1.5} />}
-            disabled={status.selectedRepo.length == 0 && status.source == Sources.Database}
+            disabled={!status.selectTissue || (status.selectedRepo.length == 0 && status.source == Sources.Database)}
             active={status.stage == Stage.Cell}
-            onClick={() => setStatus({ ...status, stage: Stage.Analysis })}
+            onClick={() => setStatus({ ...status, stage: Stage.Cell })}
+            description={`${status.cells.length} cells selected`}
           />
+          <MyNav
+            label="Settings"
+            leftSection={<IconSettings size="1rem" stroke={1.5} />}
+            disabled={status.cells.length == 0}
+            active={status.stage == Stage.Settings}
+            onClick={() => setStatus({ ...status, stage: Stage.Settings })}
+          />
+
         </AppShell.Navbar>
 
         <AppShell.Main>
@@ -111,6 +121,7 @@ function App() {
             {status.stage == Stage.Cell &&
               <CellsSelection repos={status.selectedRepo} cells={status.cells} tissue={status.selectTissue} onCellsSelected={(cells) => setStatus({ ...status, cells: cells })} />
             }
+            {status.stage == Stage.Settings && <SettingsOptions settings={status.settings} onSave={settings => setStatus({...status, settings: settings})} /> }
             <NavButtons currentStatus={status}  next={(nextStage) => moveStage(nextStage)} prev={(prevStage) => moveStage(prevStage)} />
           </Stack>
         </AppShell.Main>

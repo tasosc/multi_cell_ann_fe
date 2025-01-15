@@ -7,22 +7,28 @@ export class BackendApi {
     }
 
     get_tissues() : Promise<string[]> {
-        let tissuesUrl= new URL("tissues", this.url);
+        const tissuesUrl= new URL("tissues", this.url);
         return fetch(tissuesUrl)
         .then(res => res.json())
     }
 
     get_sources(tissue: string, setSources: (sources: string[]) => void) {
-        let sourcesUrl= new URL(`tissues/${tissue}/sources`, this.url);
+        const sourcesUrl= new URL(`tissues/${tissue}/sources`, this.url);
         fetch(sourcesUrl)
         .then(res => res.json())
         .then(setSources)
     }
     get_cells(tissue: string, sources: string[]): Promise<Cell[]> {
         const queryParameters = sources ? sources.join('&sources=') : '';
-        let queryParameter = queryParameters.length > 0 ? `?sources=${queryParameters}` : '';
-        let sourcesUrl= new URL(`tissues/${tissue}/cells${queryParameter}`, this.url);
+        const queryParameter = queryParameters.length > 0 ? `?sources=${queryParameters}` : '';
+        const sourcesUrl= new URL(`tissues/${tissue}/cells${queryParameter}`, this.url);
         return fetch(sourcesUrl)
+        .then(res => res.json())
+    }
+
+    get_default_settings() : Promise<Settings> {
+        const settingsUrl= new URL("metadata/settings/defaults", this.url);
+        return fetch(settingsUrl)
         .then(res => res.json())
     }
 }
@@ -35,15 +41,57 @@ export interface Cell {
     new_genes?: string[];
 }
 
-export class CellImpl implements Cell {
-    cell_type: string;
-    gene_selection?: string[];
-    genes: string[];
-    is_selected: boolean;
-    new_genes?: string[];
-    constructor(cell_type: string, genes: string[] ) {
-        this.cell_type = cell_type;
-        this.genes = genes;
-        this.is_selected = false;
+export enum SvdSolverOptions {
+    arpack = "arpack",
+    lobpcg = "lobpcg",
+    auto = "auto",
+    randomized = "randomized"
+}
+
+export enum ReportingOptions {
+    none = 0,
+    as_progress=1 << 1,
+    pdf = 1 << 2
+}
+
+export interface Settings {
+    cluster_resolution: number; // = 0.4
+    svd_solver: SvdSolverOptions; // = SvdSolverOptions.arpack
+    leiden_key: string; // = "leiden"
+    n_genes_min: number; // = 1000
+    n_genes_max: number; // = 10000
+    min_genes: number; // = 100
+    min_cells: number; // = 3
+    n_counts_max: number; // = 30000
+    pc_mito: number; // = 20
+    pc_rib: number; // = 25
+    n_neigh: number; // = 10
+    n_pcs: number; // = 40
+    csv_delimiter: string; // = ","
+    normalize_total_counts: boolean; // = False
+    only_highly_significant_genes: boolean; // = False
+    verbosity: number; // = 1
+    output: ReportingOptions; // = ReportingOptions.as_progress | ReportingOptions.pdf
+}
+
+export function default_settings(): Settings {
+    return {
+        cluster_resolution: 0.4,
+        svd_solver: SvdSolverOptions.arpack,
+        leiden_key: "leiden",
+        n_genes_min: 1000,
+        n_genes_max: 10000,
+        min_genes: 100,
+        min_cells: 3,
+        n_counts_max: 30000,
+        pc_mito: 20,
+        pc_rib: 25,
+        n_neigh: 10,
+        n_pcs: 40,
+        csv_delimiter: ",",
+        normalize_total_counts: false,
+        only_highly_significant_genes: false,
+        verbosity: 1,
+        output: ReportingOptions.as_progress | ReportingOptions.pdf
     }
 }
