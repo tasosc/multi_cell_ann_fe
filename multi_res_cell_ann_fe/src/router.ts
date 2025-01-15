@@ -67,7 +67,7 @@ export function get_disabled(routing: Routing) : boolean {
         case Stage.Settings:
             return false;
         case Stage.File:
-            return false;
+            return !routing.currentStatus.dataset;
         case Stage.Analysis:
             return false;
         case Stage.Completed:

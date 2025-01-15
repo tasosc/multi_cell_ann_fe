@@ -3,7 +3,7 @@ import '@mantine/core/styles.css';
 import { FileInput, MantineProvider, Stack } from '@mantine/core';
 import { AppShell, Burger } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconHome2,  IconFileImport, IconActivityHeartbeat, IconDatabase, IconCell, IconSettings } from '@tabler/icons-react';
+import { IconHome2,  IconFileImport, IconActivityHeartbeat, IconDatabase, IconCell, IconSettings, IconMatrix, IconAnalyze, IconSettingsAutomation, IconReportMedical } from '@tabler/icons-react';
 import { Stage } from './Stage';
 import { CurrentState } from './Stage';
 import { SelectedSource, Sources } from './SelectSource'
@@ -91,7 +91,28 @@ function App() {
             active={status.stage == Stage.Settings}
             onClick={() => setStatus({ ...status, stage: Stage.Settings })}
           />
-
+          <MyNav
+            label="Upload scRNA seq dataset"
+            leftSection={<IconMatrix size="1rem" stroke={1.5} />}
+            disabled={status.cells.length == 0 || !status.selectTissue}
+            active={status.stage == Stage.File}
+            onClick={() => setStatus({ ...status, stage: Stage.File })}
+            description={!status.dataset ? "No scRNA-seq file loaded" : `Dataset: ${status.dataset.name}`}
+          />
+          <MyNav
+            label="Analysis"
+            leftSection={<IconAnalyze size="1rem" stroke={1.5} />}
+            disabled={status.cells.length == 0 || !status.selectTissue}
+            active={status.stage == Stage.Analysis}
+            onClick={() => setStatus({ ...status, stage: Stage.Analysis })}
+          />
+          <MyNav
+            label="Results"
+            leftSection={<IconReportMedical size="1rem" stroke={1.5} />}
+            disabled={false}
+            active={status.stage == Stage.Completed}
+            onClick={() => setStatus({ ...status, stage: Stage.Completed })}
+          />
         </AppShell.Navbar>
 
         <AppShell.Main>
@@ -104,12 +125,22 @@ function App() {
             }
             {status.stage == Stage.ImportFile &&
               <FileInput
+                rightSection={<IconSettingsAutomation/>}
+                accept='application/json'
                 radius="md"
                 value={importFile}
                 label="Select previously saved cells"
                 description="Import previously saved cell and gene selection"
                 placeholder="Select previously saved cells and genes"
-                onChange={setImportFile}
+                onChange={(payload) => {
+                  if (payload) {
+                    payload
+                    .text()
+                    .then(value => JSON.parse(value))
+                    .then(json => console.log(json));
+                  }
+                  return setImportFile(payload);
+                }}
               />
             }
             {status.stage == Stage.Tissue &&
@@ -122,6 +153,16 @@ function App() {
               <CellsSelection repos={status.selectedRepo} cells={status.cells} tissue={status.selectTissue} onCellsSelected={(cells) => setStatus({ ...status, cells: cells })} />
             }
             {status.stage == Stage.Settings && <SettingsOptions settings={status.settings} onSave={settings => setStatus({...status, settings: settings})} /> }
+            {status.stage == Stage.File &&
+              <FileInput
+                radius="md"
+                value={status.dataset}
+                label="scRNA-seq dataset"
+                description="The application supports .h5ad, .txt and .csv files. The csv files can be compressed with gzip.By default it will use predefined Prostate test data."
+                placeholder="Upload a scRNA-seq dataset"
+                onChange={payload => setStatus({ ...status, dataset: payload })}
+              />
+            }
             <NavButtons currentStatus={status}  next={(nextStage) => moveStage(nextStage)} prev={(prevStage) => moveStage(prevStage)} />
           </Stack>
         </AppShell.Main>

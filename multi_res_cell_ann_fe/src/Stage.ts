@@ -20,4 +20,5 @@ export interface CurrentState {
     source: Sources;
     cells: Cell[];
     settings?: Settings;
+    dataset?: File | null;
 }
