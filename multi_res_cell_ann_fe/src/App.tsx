@@ -8,7 +8,7 @@ import { Stage } from './Stage';
 import { CurrentState } from './Stage';
 import { SelectedSource, Sources } from './SelectSource'
 import { MyNav } from './MyNav';
-import { SelectTissue } from './DropdownScrollSearch';
+import { SelectTissue } from './SelectTissue';
 import { SelectedRepo } from './SelectRepo';
 import { NavButtons } from './NavButtons';
 import { CellsSelection } from './Cells';
