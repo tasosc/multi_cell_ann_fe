@@ -13,6 +13,8 @@ import { SelectedRepo } from './SelectRepo';
 import { NavButtons } from './NavButtons';
 import { CellsSelection } from './Cells';
 import { SettingsOptions } from './Settings';
+import { Analysis } from './Analysis';
+import { default_settings } from './api';
 function App() {
 
   const [opened, { toggle }] = useDisclosure();
@@ -163,6 +165,7 @@ function App() {
                 onChange={payload => setStatus({ ...status, dataset: payload })}
               />
             }
+            {status.stage == Stage.Analysis && <Analysis cells={status.cells} settings={status.settings ?? default_settings()} dataset={status.dataset} onSessionChange={(session) => console.log(session)}/>}
             <NavButtons currentStatus={status}  next={(nextStage) => moveStage(nextStage)} prev={(prevStage) => moveStage(prevStage)} />
           </Stack>
         </AppShell.Main>

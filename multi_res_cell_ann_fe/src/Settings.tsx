@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { BackendApi, default_settings, Settings, SvdSolverOptions } from "./api";
-import { NumberInput, RangeSlider, Select, Slider, Stack, TextInput, Text, Title, Switch, Button, Space } from "@mantine/core";
+import { NumberInput, Select, Slider, Stack, TextInput, Text, Title, Switch, Button, Space } from "@mantine/core";
 import { IconFileImport } from "@tabler/icons-react";
 
 interface SettingsProps {
