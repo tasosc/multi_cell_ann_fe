@@ -34,20 +34,25 @@ export class BackendApi {
         .then(res => res.json())
     }
 
-    create_session(settings: Settings, cells: Cell[]) {
+    async create_session(settings: Settings, cells: Cell[]) {
         const myHeaders = new Headers();
         myHeaders.append("Content-Type", "application/json");
         const resource = new URL("session", this.url);
         const simple_cells : SimpleCells[] = cells.map(cell => { return {cell_type: cell.cell_type, genes: cell.is_selected ? cell.genes : merge(cell.gene_selection, cell.new_genes)}});
-        return fetch(resource, {method: "POST", headers: myHeaders, body: JSON.stringify({settings: settings, cells: simple_cells})}).then(res => res.json());
+        const res = await fetch(resource, { method: "POST", headers: myHeaders, body: JSON.stringify({ settings: settings, cells: simple_cells }) });
+        return await res.json();
     }
     analyze(session: string, dataset?: File|null) {
         const resource = new URL(`analyze/${session}`, this.url);
-        const content = dataset;
+        const formData : FormData = new FormData();
+        if (dataset) {
+            formData.append('file', dataset);
+        }
+        else {
+            formData.append('file', '');
+        }
 
-        const myHeaders = new Headers();
-        myHeaders.append("Content-Type", "application/octet-stream");
-        return fetch(resource, {headers: myHeaders, method: "POST", body: content}).then(res => res.blob())
+        return fetch(resource, { method: "POST", body: formData});
     }
 }
 

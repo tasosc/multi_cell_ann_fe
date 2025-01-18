@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { BackendApi, Cell, Settings } from "./api";
-import { Loader, Text } from "@mantine/core";
+import { Loader } from "@mantine/core";
+import { LinkAnnotatedDataset } from "./LinkAnnotatedDataset";
 
 interface AnalysisProps {
     settings: Settings;
@@ -19,15 +20,12 @@ export function Analysis(props: AnalysisProps) {
     useEffect(() => {
         api.create_session(props.settings, props.cells)
         .then((resp : SessionResp) => setSession(resp.session))
-        //.then(() => api.analyze(session, props.dataset))
-        //.then((resp: Blob) => );
-        
-    }, []);
+    }, [props.settings, props.cells]);
 
     return (
         <>
          {!session && <Loader color="blue" />}
-         {session && <Text>Session created</Text>}
+         {session && <LinkAnnotatedDataset session_id={session} dataset={props.dataset}/> }
         </>
     );
 }
