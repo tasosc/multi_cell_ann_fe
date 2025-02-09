@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { Activity, BackendApi, Cell, Settings } from "./api";
-import { Feedback } from "./Feedback";
 import { Loader } from "@mantine/core";
 import { StartDatasetProcess } from "./UploadDataset";
 
@@ -15,7 +14,7 @@ interface SessionResp {
     session: string;
 }
 
-export function Analysis(props: AnalysisProps) {
+export function Analysis(props: Readonly<AnalysisProps>) {
     const api = new BackendApi();
     const [session, setSession] = useState("");
     const [when, setWhen] = useState<Date>(new Date());

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Activity, BackendApi, FeedbackModel } from "./api";
-import { Timeline, Text, Grid, Image, Loader, ScrollArea } from "@mantine/core";
+import { Timeline, Text, Grid, Image, Loader, ScrollArea, ScrollAreaAutosize, Stack } from "@mantine/core";
 import { IconCell, IconChartArea, IconEyeCheck, IconIdBadge, IconLink, IconMatrix, IconSelector, IconTransform, IconVariable } from "@tabler/icons-react";
 import { useMap } from "@mantine/hooks";
 
@@ -20,15 +20,17 @@ interface MessageLogProps {
     messageLog : MessageLog
 }
 
-function MessageLogRender (props : MessageLogProps){
-    if (props.messageLog.image) {
-        return (<Image src={URL.createObjectURL(props.messageLog.image)} />);
+function MessageLogRender (props : Readonly<MessageLogProps>){
+    if (props.messageLog.is_image && props.messageLog.image) {
+        console.log("rendering image")
+        return (<Image src={URL.createObjectURL(props.messageLog.image)} onLoad={(event) => URL.revokeObjectURL(event.currentTarget.src)} alt="diagram" />);
     }
 
+    console.log("Rendering text")
     return (<Text>{props.messageLog.text}</Text>);
 }
 
-function TimeLineInfo(props: TimeLineInfoProps) {
+function TimeLineInfo(props: Readonly<TimeLineInfoProps>) {
     const feedback = props.feedback;
     if (!feedback) {
         return (<Text c="dimmed" size="sm">Pending</Text>)
@@ -72,69 +74,72 @@ export function Feedback(props: Readonly<FeedbackProps>) {
 
     const [messages, setMessages] = useState<MessageLog[]>([]);
     const [active, setActive] = useState(1);
-    // const [webSocket, setWebSocket] = useState<WebSocket>(api.open_socket(props.session_id));
     const [webSocketReady, setWebSocketReady] = useState(false);
     useEffect(() => {
-            const webSocket = api.open_socket(props.session_id);
-            webSocket.onopen = () => setWebSocketReady(true);
+            if (webSocketReady) {
+                console.log("Web socket already initialized but entering again");
+            } 
+            else {
+                const webSocket = api.open_socket(props.session_id);
+                webSocket.onopen = () => setWebSocketReady(true);
 
-            webSocket.onmessage = function (event) {
-                if (event.data instanceof ArrayBuffer) {
-                    const buf: ArrayBuffer = event.data;
-                    const b = new Blob([buf], { type: "image/png" })
-                    // URL.createObjectURL(b)
-                    setMessages([...messages, { is_image: true, image: b }]);
-                    // maybe have one column with timeline , second column with images and text as received
-                    // text coild be always json with message and active timeline part
-                }
-                else if (event.data instanceof Blob) {
-                    setMessages([...messages, { is_image: true, image: event.data }]);
-                }
-                else {
-                    console.log("Message received: ", event.data)
-                    const feedback: FeedbackModel = JSON.parse(event.data);
-                    if (feedback.activity != Activity.NONE) {
-                        activityLog.set(feedback.activity, feedback);
-                        setActive(get_activity(feedback))
+                webSocket.onmessage = function (event) {
+                    if (event.data instanceof ArrayBuffer) {
+                        console.log("array buf received");
+                        const buf: ArrayBuffer = event.data;
+                        const b = new Blob([buf], { type: "image/png" })
+                        setMessages((msgs) => [...msgs, { is_image: true, image: b }]);
+                    }
+                    else if (event.data instanceof Blob) {
+                        console.log("blob received");
+                        setMessages((msgs) => [...msgs, { is_image: true, image: event.data }]);
                     }
                     else {
-                        setMessages([...messages, { is_image: false, text: feedback.message }]);
+                        console.log("Message received: ", event.data)
+                        const feedback: FeedbackModel = JSON.parse(event.data);
+                        if (feedback.activity != Activity.NONE) {
+                            activityLog.set(feedback.activity, feedback);
+                            setActive(get_activity(feedback))
+                        }
+                        else {
+                            setMessages((msgs) => [...msgs, { is_image: false, text: feedback.message }]);
+                        }
                     }
-                }
-            };
+                };
 
-            webSocket.onclose = function (event) {
-                setWebSocketReady(false);
-                console.log("Code", event.code);
-                if (event.code > 1003) {
-                    console.log("Error ", event);
-                    // return;
-                }
-                if (active > -1 && activity_order[active] == Activity.END) 
-                {
-                    return;
-                }
-                setTimeout(() => {
-
-                   // setWebSocket(api.open_socket(props.session_id));
-                }, 3000);
-            };
-
-            webSocket.onerror = function (err) {
-                console.log('Socket encountered error: ', err, 'Closing socket');
-                if (webSocketReady) {
+                webSocket.onclose = function (event) {
                     setWebSocketReady(false);
-                    webSocket.close();
-                }
-            };
-            return () => {
-                if (webSocketReady) {
-                    webSocket.close();
-                }
-            };
+                    console.log("Code", event.code);
+                    if (event.code > 1003) {
+                        console.log("Error ", event);
+                        // return;
+                    }
+                    if (active > -1 && activity_order[active] == Activity.END) {
+                        return;
+                    }
+                    setTimeout(() => {
+
+                        // setWebSocket(api.open_socket(props.session_id));
+                    }, 3000);
+
+                };
+
+                webSocket.onerror = function (err) {
+                    console.log('Socket encountered error: ', err, 'Closing socket');
+                    if (webSocketReady) {
+                        setWebSocketReady(false);
+                        webSocket.close();
+                    }
+                };
+                return () => {
+                    if (webSocketReady) {
+                        webSocket.close();
+                    }
+                };
+            }
     });
     let index: number = 0;
-    const log = messages.map(message => <MessageLogRender key={index++} messageLog={message} />);
+    const log = messages.map(message => <MessageLogRender key={`MSGLR_${index++}`} messageLog={message} />);
 
     return (
         <Grid grow>
@@ -173,9 +178,11 @@ export function Feedback(props: Readonly<FeedbackProps>) {
                 </Timeline>
             </Grid.Col>
             <Grid.Col span={8}>
-                <ScrollArea>
-                    {log}
-                </ScrollArea>
+                <ScrollArea.Autosize type="always">
+                    <Stack align="flex-start">
+                        {log}
+                    </Stack>
+                </ScrollArea.Autosize>
             </Grid.Col>
         </Grid>
     );
