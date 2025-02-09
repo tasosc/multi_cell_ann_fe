@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
-import { BackendApi, Cell, Settings } from "./api";
+import { useEffect, useRef, useState } from "react";
+import { Activity, BackendApi, Cell, Settings } from "./api";
+import { Feedback } from "./Feedback";
 import { Loader } from "@mantine/core";
-import { LinkAnnotatedDataset } from "./LinkAnnotatedDataset";
+import { StartDatasetProcess } from "./UploadDataset";
 
 interface AnalysisProps {
     settings: Settings;
@@ -17,15 +18,26 @@ interface SessionResp {
 export function Analysis(props: AnalysisProps) {
     const api = new BackendApi();
     const [session, setSession] = useState("");
+    const [when, setWhen] = useState<Date>(new Date());
+    const initialized = useRef(false)
     useEffect(() => {
-        api.create_session(props.settings, props.cells)
-        .then((resp : SessionResp) => setSession(resp.session))
+        async function create_session() {
+            const response : SessionResp= await api.create_session(props.settings, props.cells);
+            setSession(response.session);
+            setWhen(new Date())
+        }
+
+        if (!initialized.current) {
+            initialized.current = true;
+            create_session();
+        }
+
     }, [props.settings, props.cells]);
 
     return (
         <>
-         {!session && <Loader color="blue" />}
-         {session && <LinkAnnotatedDataset session_id={session} dataset={props.dataset}/> }
+        {!session && <Loader color="blue" />}
+        {session && <StartDatasetProcess session_id={session} start={{activity: Activity.NONE, finished: when, duration:-1}} dataset={props.dataset} />}
         </>
     );
 }

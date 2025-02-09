@@ -43,7 +43,11 @@ export class BackendApi {
         return await res.json();
     }
     analyze(session: string, dataset?: File|null) {
-        const resource = new URL(`analyze/${session}`, this.url);
+        if (!session){
+            console.log("Session not defined");
+            throw new Error("Session is null");
+        }
+        const resource = new URL(`dataset/${session}`, this.url);
         const formData : FormData = new FormData();
         if (dataset) {
             formData.append('file', dataset);
@@ -53,6 +57,15 @@ export class BackendApi {
         }
 
         return fetch(resource, { method: "POST", body: formData});
+    }
+    open_socket(session: string) {
+        if (!session){
+            console.log("Session not defined");
+            throw new Error("Session is null");
+        }
+        const resource = new URL(`ws/${session}`, this.url);
+        resource.protocol = "ws:";
+        return new WebSocket(resource);
     }
 }
 
@@ -122,4 +135,25 @@ export function default_settings(): Settings {
         verbosity: 1,
         output: ReportingOptions.as_progress | ReportingOptions.pdf
     }
+}
+export enum Activity {
+    NONE = '',
+    PARSE_DATASET = 'parse_dataset',
+    UPLOAD_DATASET = 'upload_dataset',
+    PP_QC = 'pp_qc',
+    PP_NORM = 'pp_nrom',
+    PP_FEATURE = 'pp_feature',
+    PP_REDUCTION = 'pp_reduction',
+    PP_VISUALIAZTION = 'pp_visualiaztion',
+    SI_CLUSTERING = 'si_clustering',
+    SI_ANNOTATION = 'si_annotation',
+    SI_FILE = 'si_file',
+    END = "end"
+}
+export interface FeedbackModel {
+    activity: Activity;
+    finished: Date|string;
+    duration: number;
+    message?: string;
+    link?: string
 }
