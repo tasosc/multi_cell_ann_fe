@@ -166,9 +166,11 @@ function App() {
               />
             }
             {status.stage == Stage.Analysis && <Analysis cells={status.cells} settings={status.settings ?? default_settings()} dataset={status.dataset} onSessionChange={(session) => console.log(session)}/>}
-            <NavButtons currentStatus={status}  next={(nextStage) => moveStage(nextStage)} prev={(prevStage) => moveStage(prevStage)} />
           </Stack>
         </AppShell.Main>
+        <AppShell.Footer>
+            <NavButtons currentStatus={status}  next={(nextStage) => moveStage(nextStage)} prev={(prevStage) => moveStage(prevStage)} />
+        </AppShell.Footer>
       </AppShell>
 
     </MantineProvider>
