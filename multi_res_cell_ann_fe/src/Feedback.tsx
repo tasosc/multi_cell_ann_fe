@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { Activity, BackendApi, FeedbackModel } from "./api";
-import { Timeline, Text, Grid, Image, Loader, ScrollArea, ScrollAreaAutosize, Stack } from "@mantine/core";
+import { Activity, api_instance, BackendApi, FeedbackModel } from "./api";
+import { Timeline, Text, Grid, Image, Loader, ScrollArea, ScrollAreaAutosize, Stack, Anchor, Title } from "@mantine/core";
 import { IconCell, IconChartArea, IconEyeCheck, IconIdBadge, IconLink, IconMatrix, IconSelector, IconTransform, IconVariable } from "@tabler/icons-react";
 import { useMap } from "@mantine/hooks";
 
@@ -13,8 +13,9 @@ interface TimeLineInfoProps {
 }
 interface MessageLog {
     is_image: boolean;
-    image?: Blob
+    image?: string
     text?: string
+    is_heading: boolean
 }
 interface MessageLogProps {
     messageLog : MessageLog
@@ -23,11 +24,21 @@ interface MessageLogProps {
 function MessageLogRender (props : Readonly<MessageLogProps>){
     if (props.messageLog.is_image && props.messageLog.image) {
         console.log("rendering image")
-        return (<Image src={URL.createObjectURL(props.messageLog.image)} onLoad={(event) => URL.revokeObjectURL(event.currentTarget.src)} alt="diagram" />);
+       //return (<Image src={URL.createObjectURL(props.messageLog.image)} onLoad={(event) => URL.revokeObjectURL(event.currentTarget.src)} alt="diagram" />);
+       return (<div dangerouslySetInnerHTML={{__html: props.messageLog.image}}/>);
+    }
+    if (props.messageLog.is_heading) {
+        return (<Title order={4}>{props.messageLog.text}</Title>);
     }
 
+    const word = /^[a-zA-Z0-9]/;
+    const text = props.messageLog.text;
+    
+    if (text && !word.test(text)) {
+        return (<div dangerouslySetInnerHTML={{__html: text}} />) 
+    }
     console.log("Rendering text")
-    return (<Text>{props.messageLog.text}</Text>);
+    return (<Text>{text}</Text>);
 }
 
 function TimeLineInfo(props: Readonly<TimeLineInfoProps>) {
@@ -40,10 +51,12 @@ function TimeLineInfo(props: Readonly<TimeLineInfoProps>) {
         return (<Loader color="red">feedback</Loader>);
     }
     const finished: Date = feedback.finished instanceof Date? feedback.finished : new Date(feedback.finished)
+    
     return (<>
         <Text c="dimmed" size="sm">{feedback.message}</Text>
         <Text size="xs" mt={4}>Finished at {finished.toLocaleTimeString()}</Text>
        {feedback.duration > 0 && <Text size="xs" mt={4}>Duration {feedback.duration} seconds</Text> }
+       {feedback.link  && <Anchor href={api_instance.build_download_link(feedback.link)} target="_blank">{feedback.message}</Anchor> }
     </>);
 }
 
@@ -87,12 +100,13 @@ export function Feedback(props: Readonly<FeedbackProps>) {
                     if (event.data instanceof ArrayBuffer) {
                         console.log("array buf received");
                         const buf: ArrayBuffer = event.data;
-                        const b = new Blob([buf], { type: "image/png" })
-                        setMessages((msgs) => [...msgs, { is_image: true, image: b }]);
+                        const b = new Blob([buf], { type: "image/svg+xml" })
+                      //  setMessages((msgs) => [...msgs, { is_image: true, image: b, is_heading: false }]);
                     }
                     else if (event.data instanceof Blob) {
                         console.log("blob received");
-                        setMessages((msgs) => [...msgs, { is_image: true, image: event.data }]);
+                        event.data.text().then(svg =>  setMessages((msgs) => [...msgs, { is_image: true, image: svg, is_heading: false }]));
+                        // setMessages((msgs) => [...msgs, { is_image: true, image: event.data, is_heading: false }]);
                     }
                     else {
                         console.log("Message received: ", event.data)
@@ -100,9 +114,10 @@ export function Feedback(props: Readonly<FeedbackProps>) {
                         if (feedback.activity != Activity.NONE) {
                             activityLog.set(feedback.activity, feedback);
                             setActive(get_activity(feedback))
+                            setMessages((msgs) => [...msgs, { is_image: false, is_heading: true, text: feedback.message ?? feedback.activity }]);
                         }
                         else {
-                            setMessages((msgs) => [...msgs, { is_image: false, text: feedback.message }]);
+                            setMessages((msgs) => [...msgs, { is_image: false, text: feedback.message, is_heading: false }]);
                         }
                     }
                 };
