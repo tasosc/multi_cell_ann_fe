@@ -1,5 +1,6 @@
 import { merge } from "./utils";
 
+
 export class BackendApi {
     url: URL;
 
@@ -58,6 +59,10 @@ export class BackendApi {
 
         return fetch(resource, { method: "POST", body: formData});
     }
+    build_download_link(link: string) {
+        const resource = new URL(link, this.url);
+        return resource.toString();
+    }
     open_socket(session: string) {
         if (!session){
             console.log("Session not defined");
@@ -68,6 +73,8 @@ export class BackendApi {
         return new WebSocket(resource);
     }
 }
+
+export const api_instance = new BackendApi();
 
 interface SimpleCells {
     cell_type: string;
