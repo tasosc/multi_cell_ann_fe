@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Activity, api_instance, BackendApi, FeedbackModel } from "./api";
-import { Timeline, Text, Grid, Image, Loader, ScrollArea, ScrollAreaAutosize, Stack, Anchor, Title } from "@mantine/core";
+import { Timeline, Text, Grid, Image, Loader, ScrollArea, ScrollAreaAutosize, Stack, Anchor, Title, Tree, Table } from "@mantine/core";
 import { IconCell, IconChartArea, IconEyeCheck, IconIdBadge, IconLink, IconMatrix, IconSelector, IconTransform, IconVariable } from "@tabler/icons-react";
 import { useMap } from "@mantine/hooks";
 
@@ -32,12 +32,21 @@ function MessageLogRender (props : Readonly<MessageLogProps>){
     }
 
     const word = /^[a-zA-Z0-9]/;
-    const text = props.messageLog.text;
+    const text = props.messageLog.text?.trim();
     
     if (text && !word.test(text)) {
-        return (<div dangerouslySetInnerHTML={{__html: text}} />) 
+        const stext = text.charAt(0);
+        if (stext == "<") {
+            console.log("Rendering html");
+            return (<div dangerouslySetInnerHTML={{ __html: text }} />) 
+        }
+        else if (stext == "[") {
+            console.log("Rendering json");
+            const j = JSON.parse(text);
+            return (<Table data={{body: j}} />);
+        }
     }
-    console.log("Rendering text")
+    console.log("Rendering text");
     return (<Text>{text}</Text>);
 }
 
@@ -193,11 +202,9 @@ export function Feedback(props: Readonly<FeedbackProps>) {
                 </Timeline>
             </Grid.Col>
             <Grid.Col span={8}>
-                <ScrollArea.Autosize type="always">
-                    <Stack align="flex-start">
+                <ScrollArea type="always">
                         {log}
-                    </Stack>
-                </ScrollArea.Autosize>
+                </ScrollArea>
             </Grid.Col>
         </Grid>
     );

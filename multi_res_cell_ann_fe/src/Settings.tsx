@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { BackendApi, default_settings, Settings, SvdSolverOptions } from "./api";
-import { NumberInput, Select, Slider, Stack, TextInput, Text, Title, Switch, Button, Space } from "@mantine/core";
+import { NumberInput, Select, Slider, TextInput, Text, Title, Switch, Button, Space } from "@mantine/core";
 import { IconFileImport } from "@tabler/icons-react";
 
 interface SettingsProps {
@@ -16,13 +16,13 @@ interface PureNumberInputProps {
     max?: number;
 }
 
-function PureNumberInput (props: PureNumberInputProps) {
+function PureNumberInput (props: Readonly<PureNumberInputProps>) {
     return (
             <NumberInput label={props.label} min={props.min} max={props.max} value={props.value} onChange={(value) => props.onChange(+value)}/>);
 }
 
 
-export function SettingsOptions(props: SettingsProps) {
+export function SettingsOptions(props: Readonly<SettingsProps>) {
 
     const api = new BackendApi();
     const [defaultSettings, setDefaultSettings] = useState<Settings>(props.settings ?? default_settings());
@@ -34,7 +34,7 @@ export function SettingsOptions(props: SettingsProps) {
     },[]);
 
     return (
-        <Stack gap="sm">
+            <>
             <Title order={3}>General settings</Title>
             <Text>Verbosity</Text>
             <Slider color="blue" marks={[
@@ -96,7 +96,7 @@ export function SettingsOptions(props: SettingsProps) {
             ]} step={0.1} min={0.1} max={1.0} value={defaultSettings.cluster_resolution} onChange={(value => setDefaultSettings({...defaultSettings, cluster_resolution: value}))}/>
             <Space h="md"/>
             <Button variant="filled" onClick={() => props.onSave(defaultSettings)}><IconFileImport/>Save</Button>
-        </Stack>
+</>
 
     );
 }

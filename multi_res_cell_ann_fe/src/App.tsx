@@ -1,11 +1,9 @@
 import { useState } from 'react'
 import '@mantine/core/styles.css';
-import { FileInput, MantineProvider, Stack } from '@mantine/core';
-import { AppShell, Burger } from '@mantine/core';
+import { FileInput, MantineProvider, ScrollArea, Stack , AppShell, Burger } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconHome2,  IconFileImport, IconActivityHeartbeat, IconDatabase, IconCell, IconSettings, IconMatrix, IconAnalyze, IconSettingsAutomation, IconReportMedical } from '@tabler/icons-react';
-import { Stage } from './Stage';
-import { CurrentState } from './Stage';
+import { Stage , CurrentState } from './Stage';
 import { SelectedSource, Sources } from './SelectSource'
 import { MyNav } from './MyNav';
 import { SelectTissue } from './SelectTissue';
@@ -26,7 +24,8 @@ function App() {
   return (
     <MantineProvider>
       <AppShell
-        header={{ height: { base: 60, md: 70, lg: 80 } }}
+        header={{ height: { base: 60, md: 70, lg: 80 }, offset: true }}
+        footer={{height: {base: 60, md: 70, lg: 80}, offset: true}}
         navbar={{
           width: { base: 200, md: 300, lg: 400 },
           breakpoint: 'md',
@@ -118,7 +117,7 @@ function App() {
         </AppShell.Navbar>
 
         <AppShell.Main>
-          <Stack align='flex-start'>
+          <Stack align='stretch' justify="flex-start">
             {status.stage == Stage.Source &&
               <SelectedSource currentSource={status.source} onChange={(target) => { setStatus({ ...status, source: target }); }} />
             }
