@@ -63,6 +63,7 @@ export class BackendApi {
         const resource = new URL(link, this.url);
         return resource.toString();
     }
+   
     open_socket(session: string) {
         if (!session){
             console.log("Session not defined");
@@ -163,4 +164,5 @@ export interface FeedbackModel {
     duration: number;
     message?: string;
     link?: string
+    report_link?: string
 }

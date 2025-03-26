@@ -1,9 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Activity, api_instance, BackendApi, FeedbackModel } from "./api";
-import { Timeline, Text, Grid, Image, Loader, ScrollArea, ScrollAreaAutosize, Stack, Anchor, Title, Tree, Table } from "@mantine/core";
+import { Timeline, Text, Grid, Loader, ScrollArea, Anchor, Title, Table, TableData } from "@mantine/core";
 import { IconCell, IconChartArea, IconEyeCheck, IconIdBadge, IconLink, IconMatrix, IconSelector, IconTransform, IconVariable } from "@tabler/icons-react";
 import { useMap } from "@mantine/hooks";
 
+const word = /^[a-zA-Z0-9]/;
+const re=/'/g;
 interface FeedbackProps {
     session_id: string;
     activityLog: Map<Activity, FeedbackModel>
@@ -31,7 +33,6 @@ function MessageLogRender (props : Readonly<MessageLogProps>){
         return (<Title order={4}>{props.messageLog.text}</Title>);
     }
 
-    const word = /^[a-zA-Z0-9]/;
     const text = props.messageLog.text?.trim();
     
     if (text && !word.test(text)) {
@@ -41,9 +42,28 @@ function MessageLogRender (props : Readonly<MessageLogProps>){
             return (<div dangerouslySetInnerHTML={{ __html: text }} />) 
         }
         else if (stext == "[") {
-            console.log("Rendering json");
-            const j = JSON.parse(text);
-            return (<Table data={{body: j}} />);
+            console.log("Rendering json array");
+            try {
+                const j = JSON.parse(text.replace(re,'"'));
+                return (<Text>{j}</Text>);
+            }
+            catch {
+                console.log(text);
+            }
+        }
+        else if (stext == "{") {
+            console.log("Rendering json obj");
+            const j = JSON.parse(text.replace(re, '"'));
+            if (j.columns) {
+                const data: TableData = {
+                    head: j.columns,
+                    body: j.data
+                };
+                return (<Table data={data} />);
+            }
+            else {
+                console.log("Unable to render json obj", j);
+            }
         }
     }
     console.log("Rendering text");
@@ -65,7 +85,8 @@ function TimeLineInfo(props: Readonly<TimeLineInfoProps>) {
         <Text c="dimmed" size="sm">{feedback.message}</Text>
         <Text size="xs" mt={4}>Finished at {finished.toLocaleTimeString()}</Text>
        {feedback.duration > 0 && <Text size="xs" mt={4}>Duration {feedback.duration} seconds</Text> }
-       {feedback.link  && <Anchor href={api_instance.build_download_link(feedback.link)} target="_blank">{feedback.message}</Anchor> }
+       {feedback.link  && <Anchor href={api_instance.build_download_link(feedback.link)} target="_blank">Click to download Dataset</Anchor> }
+       {feedback.report_link  && <Anchor href={api_instance.build_download_link(feedback.report_link)} target="_blank">Click to download Report</Anchor> }
     </>);
 }
 
