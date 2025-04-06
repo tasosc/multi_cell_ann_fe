@@ -116,10 +116,10 @@ export class BackendApi {
                 reconnect = false;
                 //force_close();
             }
-
+            return webSocket;
         }
 
-        start_socket(session);
+        webSocket = start_socket(session);
 
         const is_connected = () => webSocketReady;
         const set_onmessage = function(funct : (event : MessageEvent) => void) {
@@ -140,7 +140,9 @@ export class BackendApi {
 }
 
 export const api_instance = new BackendApi();
-
+export interface SessionResp {
+    session: string;
+}
 interface SimpleCells {
     cell_type: string;
     genes: string[];

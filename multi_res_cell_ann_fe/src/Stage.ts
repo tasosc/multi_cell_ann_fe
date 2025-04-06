@@ -21,6 +21,7 @@ export interface CurrentState {
     cells: Cell[];
     settings?: Settings;
     dataset?: File | null;
+    session_id?: string | null;
 }
 
 export interface CurrentStateExport {

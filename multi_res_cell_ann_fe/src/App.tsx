@@ -1,29 +1,29 @@
 import { useState } from 'react'
 import '@mantine/core/styles.css';
 import { FileInput, MantineProvider, Stack , AppShell, Burger, Group, FileButton, Button } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
-import { IconHome2,  IconFileImport, IconActivityHeartbeat, IconDatabase, IconCell, IconSettings, IconMatrix, IconAnalyze, IconSettingsAutomation, IconReportMedical, IconDownload } from '@tabler/icons-react';
-import FileSaver, { saveAs } from 'file-saver';
+import { useDisclosure, useMap } from '@mantine/hooks';
+import { IconActivityHeartbeat, IconDatabase, IconCell, IconSettings, IconMatrix, IconAnalyze, IconDownload } from '@tabler/icons-react';
+import { saveAs } from 'file-saver';
 
 import { Stage , CurrentState, to_export, from_export } from './Stage';
-import { SelectedSource, Sources } from './SelectSource'
+import { Sources } from './SelectSource'
 import { MyNav } from './MyNav';
 import { SelectTissue } from './SelectTissue';
 import { SelectedRepo } from './SelectRepo';
 import { NavButtons } from './NavButtons';
 import { CellsSelection } from './Cells';
 import { SettingsOptions } from './Settings';
-import { Analysis } from './Analysis';
-import { default_settings } from './api';
+import { Activity, api_instance, default_settings, FeedbackModel, SessionResp } from './api';
+import { Feedback } from './Feedback';
 
 function App() {
 
   const [opened, { toggle }] = useDisclosure();
   const [status, setStatus] = useState<CurrentState>({stage: Stage.Tissue, selectedRepo : [], selectTissue: "", source: Sources.Database, cells: [] });
-  const [importFile, setImportFile] = useState<File | null>(null);
 
   const moveStage=(stage: Stage) => setStatus({...status, stage: stage});
 
+  const activityLog = useMap<Activity, FeedbackModel>();
   return (
     <MantineProvider>
       <AppShell
@@ -119,10 +119,26 @@ function App() {
                 label="scRNA-seq dataset"
                 description="The application supports .h5ad, .txt and .csv files. The csv files can be compressed with gzip.By default it will use predefined Prostate test data."
                 placeholder="Upload a scRNA-seq dataset"
-                onChange={payload => setStatus({ ...status, dataset: payload })}
+                onChange={payload => {
+
+                  async function create_session(status: CurrentState) {
+                    
+                    const response : SessionResp= await api_instance.create_session(status.settings ?? default_settings(), status.cells);
+                    console.log("create session", response);
+                    activityLog.set(Activity.NONE, {activity: Activity.NONE, finished: new Date(), duration:-1});
+                    console.log("save start activity in state");
+                    await api_instance.analyze(response.session, payload)
+                      .then(resp => resp.json())
+                      .then((r: FeedbackModel) => activityLog.set(Activity.UPLOAD_DATASET, r));
+                    console.log("uploaded file");
+                    setStatus({...status, session_id: response.session, dataset: payload });
+                    console.log("save session in state");
+                  }
+                  create_session(status);
+                }}
               />
             }
-            {status.stage == Stage.Analysis && <Analysis cells={status.cells} settings={status.settings ?? default_settings()} dataset={status.dataset} onSessionChange={(session) => console.log(session)}/>}
+            {status.stage == Stage.Analysis && status.session_id && <Feedback analysisSocket={api_instance.get_analysis_socket(status.session_id)} activityLog={activityLog}  />}
           </Stack>
         </AppShell.Main>
         <AppShell.Footer>

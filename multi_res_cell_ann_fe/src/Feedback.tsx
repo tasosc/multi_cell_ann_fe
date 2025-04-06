@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Activity, AnalysisSocket, api_instance, FeedbackModel } from "./api";
-import { Timeline, Text, Loader, Anchor } from "@mantine/core";
+import { Timeline, Text, Loader, Anchor, Stack, Space } from "@mantine/core";
 import { IconCell, IconChartArea, IconEyeCheck, IconIdBadge, IconLink, IconMatrix, IconSelector, IconTransform, IconVariable } from "@tabler/icons-react";
 import { useMap } from "@mantine/hooks";
 
@@ -28,6 +28,7 @@ function TimeLineInfo(props: Readonly<TimeLineInfoProps>) {
         <Text size="xs" mt={4}>Finished at {finished.toLocaleTimeString()}</Text>
        {feedback.duration > 0 && <Text size="xs" mt={4}>Duration {feedback.duration} seconds</Text> }
        {feedback.link  && <Anchor href={api_instance.build_download_link(feedback.link)} target="_blank">Click to download Dataset</Anchor> }
+       <Space w="sm" />
        {feedback.report_link  && <Anchor href={api_instance.build_download_link(feedback.report_link)} target="_blank">Click to download Report</Anchor> }
     </>);
 }
@@ -79,11 +80,9 @@ export function Feedback(props: Readonly<FeedbackProps>) {
     }, [setWebSocketReady]);
 
     useEffect(() => {
-        // TODO check https://stackoverflow.com/questions/62768520/reconnecting-web-socket-using-react-hooks
-        // redo outside use effect althouth it is working now mostly
-            if (webSocketReady) {
-               webSocket.webSocket.send("Ready");
-            }
+        if (webSocketReady) {
+            webSocket.webSocket.send("Ready");
+        }
     }, [webSocketReady]);
 
     return (

@@ -7,10 +7,6 @@ export interface Routing {
 
 export function get_next_stage(routing: Routing) : Stage | null {
     switch(routing.currentStatus.stage) {
-        case Stage.Source:
-            return routing.currentStatus.source == Sources.Database ? Stage.Tissue : Stage.ImportFile;
-        case Stage.ImportFile:
-            return Stage.File;
         case Stage.Tissue:
             return Stage.Repo;
         case Stage.Repo:
@@ -22,7 +18,7 @@ export function get_next_stage(routing: Routing) : Stage | null {
         case Stage.File:
             return Stage.Analysis;
         case Stage.Analysis:
-            return Stage.Completed;
+            return null;
         default:
             return null;
     }
@@ -30,12 +26,8 @@ export function get_next_stage(routing: Routing) : Stage | null {
 export function get_prev_stage(routing: Routing) : Stage| null {
     console.log("Current stage:" + Stage[routing.currentStatus.stage]);
     switch(routing.currentStatus.stage) {
-        case Stage.Source:
-            return null;
-        case Stage.ImportFile:
-            return Stage.Source;
         case Stage.Tissue:
-            return Stage.Source;
+            return null;
         case Stage.Repo:
             return Stage.Tissue;
         case Stage.Cell:
@@ -43,13 +35,13 @@ export function get_prev_stage(routing: Routing) : Stage| null {
         case Stage.Settings:
             return Stage.Cell;
         case Stage.File:
-            return routing.currentStatus.source == Sources.Database ? Stage.Settings : Stage.ImportFile;
+            return Stage.Settings;
         case Stage.Analysis:
             return Stage.File;
         case Stage.Completed:
             return Stage.Analysis;
         default:
-            return Stage.Source;
+            return Stage.Tissue;
     }
 }
 export function get_disabled(routing: Routing) : boolean {
@@ -67,9 +59,9 @@ export function get_disabled(routing: Routing) : boolean {
         case Stage.Settings:
             return false;
         case Stage.File:
-            return !routing.currentStatus.dataset;
+            return !routing.currentStatus.session_id;
         case Stage.Analysis:
-            return false;
+            return true;
         case Stage.Completed:
             return false;
         default:
