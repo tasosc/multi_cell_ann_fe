@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Activity, BackendApi, FeedbackModel } from "./api";
+import { Activity, api_instance, BackendApi, FeedbackModel } from "./api";
 import { Feedback } from "./Feedback";
 import { useMap } from "@mantine/hooks";
 
@@ -11,7 +11,7 @@ interface UploadDatasetProps {
 
 export function StartDatasetProcess(props: Readonly<UploadDatasetProps>) {
     const initialized = useRef(false)
-    const api = new BackendApi();
+    const api = api_instance;
     const activityLog = useMap<Activity, FeedbackModel>([[Activity.NONE, props.start]]);
     const [active, setActive] = useState(0);
 
@@ -29,7 +29,7 @@ export function StartDatasetProcess(props: Readonly<UploadDatasetProps>) {
 
     return (
         <>
-        { active > 0 && <Feedback session_id={props.session_id} activityLog={activityLog} />}
+        { active > 0 && <Feedback analysisSocket={api.get_analysis_socket(props.session_id)} activityLog={activityLog} />}
         </>
     );
 }

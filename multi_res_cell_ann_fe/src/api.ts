@@ -1,5 +1,12 @@
 import { merge } from "./utils";
 
+export interface AnalysisSocket {
+    webSocket: WebSocket;
+    is_connected() : boolean;
+    force_close() : void;
+    set_onmessage(funct : (event : MessageEvent) => void) : void;
+    set_statuschange(funct : (webSocketReady: boolean) => void): void;
+}
 
 export class BackendApi {
     url: URL;
@@ -64,14 +71,71 @@ export class BackendApi {
         return resource.toString();
     }
    
-    open_socket(session: string) {
-        if (!session){
-            console.log("Session not defined");
-            throw new Error("Session is null");
+
+    get_analysis_socket(session: string) : AnalysisSocket {
+        let webSocket : WebSocket;
+        let reconnect = true;
+        let webSocketReady = false;
+        let force_close : () => void = () => {};
+        let onstatuschange : (x:boolean) => void = () => {};
+        const url = this.url;
+        function open_socket(session: string) {
+            if (!session) {
+                console.log("Session not defined");
+                throw new Error("Session is null");
+            }
+            const resource = new URL(`ws/${session}`, url);
+            resource.protocol = "ws:";
+            return new WebSocket(resource);
         }
-        const resource = new URL(`ws/${session}`, this.url);
-        resource.protocol = "ws:";
-        return new WebSocket(resource);
+
+        const start_socket = function (session: string) {
+            webSocket = open_socket(session);
+            force_close = () => {
+                reconnect = false;
+                webSocketReady = false;
+                webSocket.close()
+            };
+
+            webSocket.onclose = (event: CloseEvent) => {
+                console.log("Code", event.code);
+                webSocketReady = false;
+                onstatuschange(webSocketReady);
+                if (!reconnect) {
+                    return;
+                }
+                start_socket(session);
+            }
+            webSocket.onopen = () => {
+                webSocketReady = true;
+                onstatuschange(webSocketReady);
+            }
+            webSocket.onerror = function(err) {
+                console.log('Socket encountered error: ', err, 'Closing socket');
+                webSocketReady = false;
+                reconnect = false;
+                //force_close();
+            }
+
+        }
+
+        start_socket(session);
+
+        const is_connected = () => webSocketReady;
+        const set_onmessage = function(funct : (event : MessageEvent) => void) {
+            webSocket.onmessage = funct;
+        }
+        const set_statuschange = function(funct : (webSocketReady: boolean) => void) {
+            onstatuschange = funct;
+        }
+
+        return { 
+            webSocket,
+            is_connected,
+            force_close,
+            set_onmessage,
+            set_statuschange
+        }
     }
 }
 
