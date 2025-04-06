@@ -22,3 +22,19 @@ export interface CurrentState {
     settings?: Settings;
     dataset?: File | null;
 }
+
+export interface CurrentStateExport {
+    stage:  Stage;
+    selectTissue: string;
+    cells: Cell[];
+    settings?: Settings;
+}
+
+export function to_export(status: CurrentState) : CurrentStateExport {
+    const stage = (status.stage == Stage.Analysis) ? Stage.File : status.stage;
+    return { stage: stage, selectTissue: status.selectTissue, cells: status.cells, settings: status.settings };
+}
+
+export function from_export(imported_status: CurrentStateExport) : CurrentState {
+    return {stage: imported_status.stage, selectTissue: imported_status.selectTissue, cells: imported_status.cells, settings: imported_status.settings, selectedRepo: [], source: Sources.Import};
+}

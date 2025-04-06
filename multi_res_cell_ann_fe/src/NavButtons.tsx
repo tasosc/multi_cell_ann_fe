@@ -9,12 +9,12 @@ interface NavButtonsProps {
     currentStatus: CurrentState
 }
 
-export function NavButtons(props: NavButtonsProps) {
+export function NavButtons(props: Readonly<NavButtonsProps>) {
     const nextStage = get_next_stage({currentStatus: props.currentStatus});
     const prevStage = get_prev_stage({currentStatus: props.currentStatus});
     const disable = get_disabled({currentStatus: props.currentStatus});
 
-    return (<Group justify="center" mt="xl">
+    return (<Group justify="center">
         <Button disabled={prevStage === null} variant="default" onClick={() => prevStage && props.prev(prevStage)}>
             Back
         </Button>

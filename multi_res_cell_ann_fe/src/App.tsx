@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import '@mantine/core/styles.css';
-import { FileInput, MantineProvider, ScrollArea, Stack , AppShell, Burger } from '@mantine/core';
+import { FileInput, MantineProvider, Stack , AppShell, Burger, Group, FileButton, Button } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconHome2,  IconFileImport, IconActivityHeartbeat, IconDatabase, IconCell, IconSettings, IconMatrix, IconAnalyze, IconSettingsAutomation, IconReportMedical } from '@tabler/icons-react';
-import { Stage , CurrentState } from './Stage';
+import { IconHome2,  IconFileImport, IconActivityHeartbeat, IconDatabase, IconCell, IconSettings, IconMatrix, IconAnalyze, IconSettingsAutomation, IconReportMedical, IconDownload } from '@tabler/icons-react';
+import FileSaver, { saveAs } from 'file-saver';
+
+import { Stage , CurrentState, to_export, from_export } from './Stage';
 import { SelectedSource, Sources } from './SelectSource'
 import { MyNav } from './MyNav';
 import { SelectTissue } from './SelectTissue';
@@ -13,10 +15,11 @@ import { CellsSelection } from './Cells';
 import { SettingsOptions } from './Settings';
 import { Analysis } from './Analysis';
 import { default_settings } from './api';
+
 function App() {
 
   const [opened, { toggle }] = useDisclosure();
-  const [status, setStatus] = useState<CurrentState>({stage: Stage.Source, selectedRepo : [], selectTissue: "", source: Sources.None, cells: [] });
+  const [status, setStatus] = useState<CurrentState>({stage: Stage.Tissue, selectedRepo : [], selectTissue: "", source: Sources.Database, cells: [] });
   const [importFile, setImportFile] = useState<File | null>(null);
 
   const moveStage=(stage: Stage) => setStatus({...status, stage: stage});
@@ -46,21 +49,6 @@ function App() {
         </AppShell.Header>
 
         <AppShell.Navbar p="md">Navbar
-          <MyNav
-            label="Select source"
-            leftSection={<IconHome2 size="1rem" stroke={1.5} />}
-            active={status.stage == Stage.Source}
-            onClick={() => setStatus({ ...status, stage: Stage.Source })}
-            description={`Current source: ${Sources[status.source]}`}
-          />
-          <MyNav
-            label="Import cells and genes"
-            leftSection={<IconFileImport size="1rem" stroke={1.5} />}
-            disabled={status.source != Sources.Import}
-            active={status.stage == Stage.ImportFile}
-            onClick={() => setStatus({ ...status, stage: Stage.ImportFile })}
-            description={status.source == Sources.Import ? "Import file" : "Disabled. Database selected"}
-          />
           <MyNav
             label='Select tissue'
             leftSection={<IconActivityHeartbeat size="1rem" stroke={1.5} />}
@@ -107,42 +95,12 @@ function App() {
             active={status.stage == Stage.Analysis}
             onClick={() => setStatus({ ...status, stage: Stage.Analysis })}
           />
-          <MyNav
-            label="Results"
-            leftSection={<IconReportMedical size="1rem" stroke={1.5} />}
-            disabled={false}
-            active={status.stage == Stage.Completed}
-            onClick={() => setStatus({ ...status, stage: Stage.Completed })}
-          />
         </AppShell.Navbar>
 
         <AppShell.Main>
           <Stack align='stretch' justify="flex-start">
-            {status.stage == Stage.Source &&
-              <SelectedSource currentSource={status.source} onChange={(target) => { setStatus({ ...status, source: target }); }} />
-            }
             {status.stage == Stage.Repo &&
               <SelectedRepo selectedRepo={status.selectedRepo} tissue={status.selectTissue} onChange={(selected) => { setStatus({ ...status, selectedRepo: selected, cells: [] }); }} />
-            }
-            {status.stage == Stage.ImportFile &&
-              <FileInput
-                rightSection={<IconSettingsAutomation/>}
-                accept='application/json'
-                radius="md"
-                value={importFile}
-                label="Select previously saved cells"
-                description="Import previously saved cell and gene selection"
-                placeholder="Select previously saved cells and genes"
-                onChange={(payload) => {
-                  if (payload) {
-                    payload
-                    .text()
-                    .then(value => JSON.parse(value))
-                    .then(json => console.log(json));
-                  }
-                  return setImportFile(payload);
-                }}
-              />
             }
             {status.stage == Stage.Tissue &&
               <SelectTissue
@@ -168,7 +126,23 @@ function App() {
           </Stack>
         </AppShell.Main>
         <AppShell.Footer>
+          <Group justify='left'>
+            <FileButton accept='application/json' onChange={(payload) => {
+              if (payload) {
+                payload.text()
+                .then(t => JSON.parse(t))
+                .then((t : CurrentState) => setStatus(from_export(t)));
+              }
+            }}>
+              {(props) => <Button {...props}>Import session</Button>}
+            </FileButton>
+            <Button variant="filled" rightSection={<IconDownload size={14} />} onClick={() =>{
+              const js : Blob = new Blob([JSON.stringify(to_export(status))]);
+              saveAs(js, "session.json");
+            }}>Save session</Button>
+            
             <NavButtons currentStatus={status}  next={(nextStage) => moveStage(nextStage)} prev={(prevStage) => moveStage(prevStage)} />
+          </Group>
         </AppShell.Footer>
       </AppShell>
 
