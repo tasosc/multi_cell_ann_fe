@@ -114,7 +114,6 @@ export class BackendApi {
                 console.log('Socket encountered error: ', err, 'Closing socket');
                 webSocketReady = false;
                 reconnect = false;
-                //force_close();
             }
             return webSocket;
         }
@@ -165,8 +164,8 @@ export enum SvdSolverOptions {
 
 export enum ReportingOptions {
     none = 0,
-    as_progress=1 << 1,
-    pdf = 1 << 2
+    as_progress = 1,
+    pdf = 2
 }
 
 export interface Settings {
@@ -207,7 +206,7 @@ export function default_settings(): Settings {
         normalize_total_counts: false,
         only_highly_significant_genes: false,
         verbosity: 1,
-        output: ReportingOptions.as_progress | ReportingOptions.pdf
+        output: ReportingOptions.pdf
     }
 }
 export enum Activity {

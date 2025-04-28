@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Activity, AnalysisSocket, api_instance, FeedbackModel } from "./api";
-import { Timeline, Text, Loader, Anchor, Stack, Space } from "@mantine/core";
+import { Timeline, Text, Loader, Anchor, Space } from "@mantine/core";
 import { IconCell, IconChartArea, IconEyeCheck, IconIdBadge, IconLink, IconMatrix, IconSelector, IconTransform, IconVariable } from "@tabler/icons-react";
 import { useMap } from "@mantine/hooks";
 

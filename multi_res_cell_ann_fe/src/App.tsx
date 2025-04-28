@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import '@mantine/core/styles.css';
-import { FileInput, MantineProvider, Stack , AppShell, Burger, Group, FileButton, Button } from '@mantine/core';
+import { FileInput, MantineProvider, Stack , AppShell, Burger, Group, FileButton, Button, Text } from '@mantine/core';
 import { useDisclosure, useMap } from '@mantine/hooks';
 import { IconActivityHeartbeat, IconDatabase, IconCell, IconSettings, IconMatrix, IconAnalyze, IconDownload } from '@tabler/icons-react';
 import { saveAs } from 'file-saver';
@@ -18,7 +18,7 @@ import { Feedback } from './Feedback';
 
 function App() {
 
-  const [opened, { toggle }] = useDisclosure();
+  const [opened, { toggle }] = useDisclosure(true);
   const [status, setStatus] = useState<CurrentState>({stage: Stage.Tissue, selectedRepo : [], selectTissue: "", source: Sources.Database, cells: [] });
 
   const moveStage=(stage: Stage) => setStatus({...status, stage: stage});
@@ -32,23 +32,23 @@ function App() {
         navbar={{
           width: { base: 200, md: 300, lg: 400 },
           breakpoint: 'md',
-          collapsed: { mobile: !opened },
+          collapsed: { mobile: !opened, desktop: !opened },
         }}
         layout='alt'
         padding={{ base: 30, sm: 15, lg: 'xl' }}
       >
         <AppShell.Header>
+        <Group h="100%" px="md">
           <Burger
             opened={opened}
             onClick={toggle}
-            hiddenFrom="sm"
             size="sm"
           />
-          <div><b>Multi-resource</b></div>
-          <div><b>Multi-resource single cell RNA sequence (scRNA-seq) dataset cell annotation</b></div>
+          <Text fw={700}>Multi-resource single cell RNA sequence (scRNA-seq) dataset cell annotation</Text>
+          </Group>
         </AppShell.Header>
 
-        <AppShell.Navbar p="md">Navbar
+        <AppShell.Navbar p="md">
           <MyNav
             label='Select tissue'
             leftSection={<IconActivityHeartbeat size="1rem" stroke={1.5} />}
