@@ -1,18 +1,17 @@
 import { useEffect, useState } from 'react';
 import { CloseButton, Combobox, Container, TextInput, useCombobox } from '@mantine/core';
-import { BackendApi } from './api';
+import { api_instance } from './api';
 
 interface DropdownScrollProps {
   selectedTissue: string;
   onChange: (current: string) => void;
 }
 
-export function SelectTissue(props: DropdownScrollProps) {
+export function SelectTissue(props: Readonly<DropdownScrollProps>) {
   const combobox = useCombobox({
     onDropdownClose: () => combobox.resetSelectedOption(),
   });
 
-  let api = new BackendApi();
   const [value, setValue] = useState(props.selectedTissue);
   const [loading, setLoading] = useState(false);
   const [tissues, setTissues] = useState<string[]>([]);
@@ -21,7 +20,7 @@ export function SelectTissue(props: DropdownScrollProps) {
   useEffect(() => {
     if (tissues.length == 0 && !loading) {
       setLoading(true);
-      api.get_tissues()
+      api_instance.get_tissues()
         .then((value: string[]) => {
           setLoading(false);
           setTissues(value);

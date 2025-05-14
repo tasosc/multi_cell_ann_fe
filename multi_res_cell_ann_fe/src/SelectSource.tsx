@@ -20,13 +20,13 @@ interface SourceRadioProps {
     onChange: () => void;
 }
 
-function SourceRadio(props: SourceRadioProps) {
+function SourceRadio(props: Readonly<SourceRadioProps>) {
     return (
         <Radio key={props.source} checked={props.checked} onChange={props.onChange} label={Sources[props.source]}/>
     );
 }
 
-export function SelectedSource(props: SelectedSourceProps) {
+export function SelectedSource(props: Readonly<SelectedSourceProps>) {
     const [value, setValue] = useState(props.currentSource);
 
     return (

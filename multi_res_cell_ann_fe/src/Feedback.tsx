@@ -77,13 +77,13 @@ export function Feedback(props: Readonly<FeedbackProps>) {
 
     useEffect(() => {
        webSocket.set_statuschange(setWebSocketReady);
-    }, [setWebSocketReady]);
+    }, [setWebSocketReady, webSocket]);
 
     useEffect(() => {
         if (webSocketReady) {
             webSocket.webSocket.send("Ready");
         }
-    }, [webSocketReady]);
+    }, [webSocketReady, webSocket.webSocket]);
 
     return (
             <Timeline active={active} bulletSize={24} lineWidth={2}>

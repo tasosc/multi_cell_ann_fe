@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { BackendApi, default_settings, Settings, SvdSolverOptions } from "./api";
+import { api_instance, default_settings, Settings, SvdSolverOptions } from "./api";
 import { NumberInput, Select, Slider, TextInput, Text, Title, Switch, Button, Space } from "@mantine/core";
 import { IconFileImport } from "@tabler/icons-react";
 
@@ -24,14 +24,13 @@ function PureNumberInput (props: Readonly<PureNumberInputProps>) {
 
 export function SettingsOptions(props: Readonly<SettingsProps>) {
 
-    const api = new BackendApi();
     const [defaultSettings, setDefaultSettings] = useState<Settings>(props.settings ?? default_settings());
 
     useEffect(() => {
         if (props.settings === undefined) {
-            api.get_default_settings().then((settings) => setDefaultSettings(settings));
+            api_instance.get_default_settings().then((settings) => setDefaultSettings(settings));
         }
-    },[]);
+    },[props.settings]);
 
     return (
             <>

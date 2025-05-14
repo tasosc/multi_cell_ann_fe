@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { BackendApi, Cell } from "./api";
+import { api_instance, Cell } from "./api";
 import { Badge, Button, CloseButton, Drawer, MultiSelect, NavLink, Stack, Switch, TagsInput, TextInput } from "@mantine/core";
 import { IconCheckbox, IconChevronRight, IconClearAll, IconFileImport, IconPlus, IconSearch } from "@tabler/icons-react";
 import { get_key, is_valid } from "./utils";
@@ -21,14 +21,13 @@ function hasSelectedGenes(cell: Cell) {
 }
 
 function setSelection(cells : Cell[], is_selected: boolean, map : Map<string, Cell>) {
-    for(let i=0; i< cells.length; i++) {
-        const c = { ...cells[i], is_selected: is_selected };
+    for(const element of cells) {
+        const c = { ...element, is_selected: is_selected };
         map.set(c.cell_type, c);
     }
 }
 
-export function CellsSelection(props: CellsSelectionProps) {
-    const api = new BackendApi();
+export function CellsSelection(props: Readonly<CellsSelectionProps>) {
     const [search, setSearch] = useState("");
     const [currentCell, setCurrentCell] = useState<Cell>({cell_type: "new", genes:[], is_selected: false, new_genes:[]});
 
@@ -39,7 +38,7 @@ export function CellsSelection(props: CellsSelectionProps) {
         if (props.repos.length == 0) {
             return;
         }
-        api
+        api_instance
         .get_cells(props.tissue, props.repos)
         .then((rcells) => rcells.map((entry) => !cells.has(entry.cell_type) && cells.set(entry.cell_type, entry)));
     }, [props.repos, props.tissue]);
