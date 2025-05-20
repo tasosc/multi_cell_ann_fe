@@ -12,9 +12,20 @@ export class BackendApi {
     url: URL;
 
     constructor() {
-        const base_url = import.meta.env.VITE_APP_API_URL;
+        const base_url = this.determine_url();
         this.url = new URL(base_url);
     }
+
+    determine_url(): string  {
+        if (import.meta.env.DEV) {
+            return import.meta.env.VITE_APP_API_URL;
+        }
+        
+        const current_url = window.location.href;
+        return current_url.replace(import.meta.env.BASE_URL, "/api/v1");
+
+    }
+
 
     get_tissues() : Promise<string[]> {
         const tissuesUrl= new URL("tissues", this.url);
