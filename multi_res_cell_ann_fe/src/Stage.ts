@@ -1,5 +1,5 @@
 import { Cell, Settings } from "./api";
-import { Sources } from "./SelectSource";
+import { Sources } from "./sources";
 
 export enum Stage {
     Source = 0,

@@ -1,4 +1,4 @@
-import { Sources } from "./SelectSource";
+import { Sources } from "./sources";
 import { CurrentState, Stage } from "./Stage";
 
 export interface Routing {

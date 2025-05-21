@@ -6,7 +6,7 @@ import { IconActivityHeartbeat, IconDatabase, IconCell, IconSettings, IconMatrix
 import { saveAs } from 'file-saver';
 
 import { Stage , CurrentState, to_export, from_export } from './Stage';
-import { Sources } from './SelectSource'
+import { Sources } from './sources'
 import { MyNav } from './MyNav';
 import { SelectTissue } from './SelectTissue';
 import { SelectedRepo } from './SelectRepo';
